@@ -10,11 +10,9 @@ class CustomAppBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             child: RawMaterialButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.pop(context),
               fillColor: c_secondary.withOpacity(0.5),
               child: Icon(
                 Icons.arrow_back,
@@ -25,7 +23,7 @@ class CustomAppBar extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(20.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
             child: RawMaterialButton(
               onPressed: () {
                 Navigator.push(

@@ -27,6 +27,7 @@ class MastersDatabaseProvider {
           "image TEXT,"
           "price INTEGER,"
           "title TEXT,"
+          "amount TEXT,"
           "description TEXT"
           ")");
     });

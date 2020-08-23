@@ -1,58 +1,119 @@
 import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:hostess/global/colors.dart';
 import 'package:hostess/screens/home_screen.dart';
 
-class StartScreen extends StatelessWidget {
+class StartScreen extends StatefulWidget {
+  @override
+  _StartScreenState createState() => _StartScreenState();
+}
+
+class _StartScreenState extends State<StartScreen> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  }
+
+  bool _scan = false;
+
   @override
   Widget build(BuildContext context) {
-    Future<void> _load(String scan) async {
-      List<String> splitRes = scan.split('//');
-      String _restaurant = splitRes[0];
-      String _address = splitRes[1];
-      await FirebaseFirestore.instance
-          .collection(_restaurant)
-          .doc(_address)
-          .get()
-          .then((DocumentSnapshot documentSnapshot) {
-        if (documentSnapshot.exists) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  HomeScreen(restaurant: _restaurant, address: _address),
-            ),
-          );
-        } else {
-          print('Error Firebase');
-        }
-      });
+    _showAlertDialog(BuildContext context) {
+      Widget okButton = FlatButton(
+        child: Text("OK"),
+        onPressed: () => Navigator.of(context).pop(),
+      );
+      AlertDialog alert = AlertDialog(
+        title: Text('Упс...'),
+        content: Text('Похоже ваш QR код неверного формата :('),
+        actions: [okButton],
+      );
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
     }
 
     Future<void> _scanQR() async {
-      var barcodeScanRes = 'Jardin//Одесса, ул. Гаванная 10';
-      /*try {
-        barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666",
-          "Отмена",
-          true,
-          ScanMode.QR,
-        );
-      } on PlatformException {
-        barcodeScanRes = 'Failed to get platform version.';
+      var barcodeScanRes;
+      if (_scan == false) {
+        barcodeScanRes = 'Jardin//Одесса, ул. Гаванная 10';
+      } else {
+        try {
+          barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+            "#ff6666",
+            "Отмена",
+            true,
+            ScanMode.QR,
+          );
+        } on PlatformException {
+          barcodeScanRes = 'Failed to get platform version.';
+        }
+        if (!mounted) return;
       }
-
-      if (!mounted) return;*/
 
       if (barcodeScanRes.contains('//')) {
-        _load(barcodeScanRes);
-      } else{
-        print('Error contains');
+        List<String> splitRes = barcodeScanRes.split('//');
+        String _restaurant = splitRes[0];
+        String _address = splitRes[1];
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(restaurant: _restaurant, address: _address),
+          ),
+        );
+      } else {
+        _showAlertDialog(context);
       }
+    }
+
+    _testDialog(BuildContext context) {
+      Widget cancelButton = FlatButton(
+        child: Text("Тестовые"),
+        onPressed: () {
+          setState(() {
+            _scan = false;
+          });
+          Navigator.of(context).pop();
+          _scanQR();
+        },
+      );
+      Widget continueButton = FlatButton(
+        child: Text("Сканировать"),
+        onPressed: () {
+          setState(() {
+            _scan = true;
+          });
+          Navigator.of(context).pop();
+          _scanQR();
+        },
+      );
+
+      // set up the AlertDialog
+      AlertDialog alert = AlertDialog(
+        title: Text("Для разработчиков"),
+        content: Text("Выберите действие"),
+        actions: [
+          cancelButton,
+          continueButton,
+        ],
+      );
+
+      // show the dialog
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return alert;
+        },
+      );
     }
 
     return Scaffold(
@@ -84,7 +145,7 @@ class StartScreen extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
+                  padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
                   child: Text(
                     'Нажмите кнопку "Сканировать", наведите камеру на QR код и всё готово!',
                     textAlign: TextAlign.center,
@@ -98,9 +159,7 @@ class StartScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 80.0, 20.0, 0.0),
                   child: FloatingActionButton.extended(
-                    onPressed: () async {
-                      await _scanQR();
-                    },
+                    onPressed: () => _testDialog(context),
                     icon: Icon(
                       Icons.camera_enhance,
                       color: t_primary,

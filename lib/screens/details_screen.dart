@@ -1,28 +1,53 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
 import 'package:hostess/database/db_cart.dart';
 import 'package:hostess/global/colors.dart';
 import 'package:hostess/models/cart.dart';
 import 'package:hostess/notifier/food_notifier.dart';
-
-import 'package:hostess/screens/cart_screen.dart';
 import 'package:hostess/widgets/appbar_item.dart';
-import 'package:hostess/widgets/chip_item.dart';
+import 'package:hostess/widgets/chip_ingredients_item.dart';
 import 'package:provider/provider.dart';
 
-class FoodDetail extends StatelessWidget {
-  _addToCart(
-      String image, String title, String price, String description) async {
+class FoodDetail extends StatefulWidget {
+  @override
+  _FoodDetailState createState() => _FoodDetailState();
+}
+
+class _FoodDetailState extends State<FoodDetail> {
+  int _selectedIndex = 0;
+  String _price, _amount;
+
+  @override
+  void initState() {
+    FoodNotifier foodNotifier =
+        Provider.of<FoodNotifier>(context, listen: false);
+    List<String> splitRes = foodNotifier.currentFood.subPrice[0].split('#');
+    _price = splitRes[1];
+    super.initState();
+  }
+
+  _addToCart(String image, String title, String price, String description,
+      String amount) async {
+    List<String> splitRes = amount.split('#');
+    _amount = splitRes[0];
     await MastersDatabaseProvider.db.addItemToDatabaseCart(
       Cart(
         image: image,
         title: title,
-        price: int.parse(price),
+        price: int.parse(_price),
         description: description,
+        amount: _amount,
       ),
     );
+  }
+
+  _onSelected(int index, subPrice) {
+    List<String> splitRes = subPrice.split('#');
+    setState(() => {
+          _selectedIndex = index,
+          _price = splitRes[1],
+        });
   }
 
   void _show(BuildContext context) {
@@ -38,7 +63,6 @@ class FoodDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     FoodNotifier foodNotifier = Provider.of<FoodNotifier>(context);
-
     return Stack(
       children: <Widget>[
         Container(
@@ -115,7 +139,7 @@ class FoodDetail extends StatelessWidget {
                               ),
                               SizedBox(width: 5),
                               Text(
-                                foodNotifier.currentFood.price,
+                                _price,
                                 style: TextStyle(
                                   color: t_primary,
                                   fontSize: 35.0,
@@ -160,8 +184,10 @@ class FoodDetail extends StatelessWidget {
                                   _addToCart(
                                     foodNotifier.currentFood.imageHigh,
                                     foodNotifier.currentFood.title,
-                                    foodNotifier.currentFood.price,
+                                    _price,
                                     foodNotifier.currentFood.description,
+                                    foodNotifier
+                                        .currentFood.subPrice[_selectedIndex],
                                   );
                                   _show(context);
                                 },
@@ -173,7 +199,47 @@ class FoodDetail extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 25),
+                      SizedBox(height: 5),
+                      Container(
+                        height: 80,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: foodNotifier.currentFood.subPrice.length,
+                          itemBuilder: (context, index) {
+                            List<String> splitRes = foodNotifier
+                                .currentFood.subPrice[index]
+                                .split('#');
+                            _amount = splitRes[0];
+                            return FilterChip(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              label: Text(
+                                _amount,
+                                style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: _selectedIndex != null &&
+                                          _selectedIndex == index
+                                      ? c_background
+                                      : t_primary.withOpacity(0.4),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              backgroundColor: _selectedIndex != null &&
+                                      _selectedIndex == index
+                                  ? c_primary
+                                  : Colors.white.withOpacity(0),
+                              elevation: 0.0,
+                              pressElevation: 0.0,
+                              onSelected: (bool value) {
+                                _onSelected(
+                                  index,
+                                  foodNotifier.currentFood.subPrice[index],
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 15),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -183,7 +249,7 @@ class FoodDetail extends StatelessWidget {
                               foodNotifier.currentFood.title,
                               style: TextStyle(
                                 color: t_primary,
-                                fontSize: 22.0,
+                                fontSize: 25.0,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -202,11 +268,26 @@ class FoodDetail extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30),
+                      foodNotifier.currentFood.subIngredients.isNotEmpty
+                          ? Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Ингредиенты',
+                                style: TextStyle(
+                                  color: t_primary,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          : Container(),
+                      SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
                         child: ChipItem(),
                       ),
+                      SizedBox(height: 20),
                     ],
                   ),
                 ),

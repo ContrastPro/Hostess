@@ -8,9 +8,22 @@ import 'package:provider/provider.dart';
 
 class MenuItem extends StatelessWidget {
   final int index;
-  final String title, image, price, description;
+  final String price;
 
-  MenuItem({this.index, this.title, this.image, this.price, this.description});
+  MenuItem({this.index, this.price});
+
+  Widget _price() {
+    List<String> splitRes = price.split('#');
+    String splitPrice = splitRes[1];
+    return Text(
+      splitPrice,
+      style: TextStyle(
+        color: t_primary,
+        fontSize: 18.0,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +51,9 @@ class MenuItem extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15.0),
                 ),
-                child: image != null
+                child: foodNotifier.foodList[index].imageLow != null
                     ? CachedNetworkImage(
-                        imageUrl: image,
+                        imageUrl: foodNotifier.foodList[index].imageLow,
                         fit: BoxFit.cover,
                         progressIndicatorBuilder:
                             (context, url, downloadProgress) => Padding(
@@ -62,7 +75,7 @@ class MenuItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      title,
+                      foodNotifier.foodList[index].title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -73,7 +86,7 @@ class MenuItem extends StatelessWidget {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      description,
+                      foodNotifier.foodList[index].description,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -100,14 +113,7 @@ class MenuItem extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 2),
-                  Text(
-                    price,
-                    style: TextStyle(
-                      color: t_primary,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  _price(),
                 ],
               ),
             ),
