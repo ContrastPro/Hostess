@@ -70,7 +70,9 @@ class _CartScreenState extends State<CartScreen> {
                     ? CachedNetworkImage(
                         fit: BoxFit.cover,
                         imageUrl: image,
-                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        errorWidget: (context, url, error) => Image.asset(
+                            'assets/placeholder_200.png',
+                            fit: BoxFit.cover),
                       )
                     : Image.asset('assets/placeholder_200.png',
                         fit: BoxFit.cover),
