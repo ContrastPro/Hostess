@@ -63,6 +63,34 @@ class _FoodDetailState extends State<FoodDetail> {
   @override
   Widget build(BuildContext context) {
     FoodNotifier foodNotifier = Provider.of<FoodNotifier>(context);
+
+    Widget _chip(int index) {
+      return FilterChip(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        label: Text(
+          _amount,
+          style: TextStyle(
+            fontSize: 16.0,
+            color: _selectedIndex != null && _selectedIndex == index
+                ? c_background
+                : t_primary.withOpacity(0.4),
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        backgroundColor: _selectedIndex != null && _selectedIndex == index
+            ? c_primary
+            : Colors.white.withOpacity(0),
+        elevation: 0.0,
+        pressElevation: 0.0,
+        onSelected: (bool value) {
+          _onSelected(
+            index,
+            foodNotifier.currentFood.subPrice[index],
+          );
+        },
+      );
+    }
+
     return Stack(
       children: <Widget>[
         Container(
@@ -210,32 +238,7 @@ class _FoodDetailState extends State<FoodDetail> {
                                 .currentFood.subPrice[index]
                                 .split('#');
                             _amount = splitRes[0];
-                            return FilterChip(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
-                              label: Text(
-                                _amount,
-                                style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: _selectedIndex != null &&
-                                          _selectedIndex == index
-                                      ? c_background
-                                      : t_primary.withOpacity(0.4),
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              backgroundColor: _selectedIndex != null &&
-                                      _selectedIndex == index
-                                  ? c_primary
-                                  : Colors.white.withOpacity(0),
-                              elevation: 0.0,
-                              pressElevation: 0.0,
-                              onSelected: (bool value) {
-                                _onSelected(
-                                  index,
-                                  foodNotifier.currentFood.subPrice[index],
-                                );
-                              },
-                            );
+                            return _chip(index);
                           },
                         ),
                       ),

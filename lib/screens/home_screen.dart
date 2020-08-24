@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -81,6 +82,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Future<void> _refreshList(String category) async {
       getFoods(foodNotifier, restaurant, address, category);
+    }
+
+    Widget _time() {
+      DateTime date = DateTime.now();
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.access_time,
+            color: Colors.white,
+            size: 18.0,
+          ),
+          SizedBox(width: 10),
+          Text(
+            profileNotifier.profileList[0].subTime[date.weekday - 1],
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18.0,
+              fontWeight: FontWeight.normal,
+            ),
+          ),
+        ],
+      );
     }
 
     Widget _chip(int index) {
@@ -259,41 +283,25 @@ class _HomeScreenState extends State<HomeScreen> {
               height: double.infinity,
               color: c_primary,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 50.0, 10.0, 50.0),
+                padding: const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(
-                      profileNotifier.profileList[0].title,
+                    AutoSizeText(
+                      profileNotifier.profileList[0].title.toUpperCase(),
+                      maxLines: 3,
                       textAlign: TextAlign.left,
+                      minFontSize: 25,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 60.0,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 50.0,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     SizedBox(height: 20),
-                    profileNotifier.profileList[0].time != null
-                        ? Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                color: Colors.white,
-                                size: 18.0,
-                              ),
-                              SizedBox(width: 10),
-                              Text(
-                                profileNotifier.profileList[0].time,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.normal,
-                                ),
-                              ),
-                            ],
-                          )
+                    profileNotifier.profileList.isNotEmpty
+                        ? _time()
                         : Container(),
                   ],
                 ),

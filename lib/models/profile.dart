@@ -3,7 +3,7 @@ class Profile {
   String title;
   String address;
   String image;
-  String time;
+  List subTime = [];
 
   Profile();
 
@@ -12,7 +12,7 @@ class Profile {
     title = data['title'];
     address = data['address'];
     image = data['image'];
-    time = data['time'];
+    subTime = data['subTime'];
   }
 
   Map<String, dynamic> toMap() {
@@ -21,7 +21,7 @@ class Profile {
       'title': title,
       'address': address,
       'image': image,
-      'time': time,
+      'subTime': subTime,
     };
   }
 }

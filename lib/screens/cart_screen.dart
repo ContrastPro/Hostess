@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hostess/database/db_cart.dart';
 import 'package:hostess/global/colors.dart';
 import 'package:hostess/models/cart.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 
 class CartScreen extends StatefulWidget {
   @override
@@ -87,7 +88,7 @@ class _CartScreenState extends State<CartScreen> {
                   children: <Widget>[
                     Text(
                       "$title",
-                      maxLines: 4,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: t_primary,
@@ -313,25 +314,31 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                           ),
                           SizedBox(width: 20.0),
-                          Row(
-                            children: [
-                              Text(
-                                '₴',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 30.0,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              SizedBox(width: 3),
-                              Text(
-                                _total != null ? _total.toString() : '0',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30.0,
-                                  fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  '₴',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.w500),
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 3),
+                                Expanded(
+                                  child: AutoSizeText(
+                                    _total != null ? '$_total' : '0',
+                                    maxLines: 1,
+                                    minFontSize: 20,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 30.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
