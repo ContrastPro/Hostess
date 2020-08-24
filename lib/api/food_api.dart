@@ -9,7 +9,7 @@ getFoods(FoodNotifier foodNotifier, String restaurant, String address,
       .doc(address)
       .collection('ru')
       .doc('Menu')
-      .collection(category != null ? category : 'Рекомендуем')
+      .collection(category)
       .get();
 
   List<Food> _foodList = [];
