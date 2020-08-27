@@ -55,7 +55,7 @@ class _FoodDetailState extends State<FoodDetail> {
       SnackBar(
         backgroundColor: Colors.green[700],
         duration: const Duration(seconds: 2),
-        content: Text("Добавлено в корзину!"),
+        content: Text("Добавлено к текущему заказу!"),
       ),
     );
   }
@@ -78,7 +78,7 @@ class _FoodDetailState extends State<FoodDetail> {
           ),
         ),
         backgroundColor: _selectedIndex != null && _selectedIndex == index
-            ? c_primary
+            ? Colors.deepOrange[900]
             : Colors.white.withOpacity(0),
         elevation: 0.0,
         pressElevation: 0.0,
@@ -146,91 +146,94 @@ class _FoodDetailState extends State<FoodDetail> {
                 ),
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 25.0, vertical: 30.0),
+                  padding: EdgeInsets.symmetric(vertical: 30.0),
                   child: Column(
                     children: <Widget>[
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                '₴',
-                                style: TextStyle(
-                                  color: t_primary,
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(width: 5),
-                              Text(
-                                _price,
-                                style: TextStyle(
-                                  color: t_primary,
-                                  fontSize: 35.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Stack(
-                            alignment: Alignment.centerRight,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(right: 26),
-                                child: Container(
-                                  width: 100,
-                                  height: 37,
-                                  decoration: BoxDecoration(
-                                    color: Colors.black12,
-                                    borderRadius: BorderRadius.all(
-                                      Radius.circular(20),
-                                    ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 25.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  '₴',
+                                  style: TextStyle(
+                                    color: t_primary,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: Padding(
-                                    padding: EdgeInsets.only(right: 5),
-                                    child: Center(
-                                      child: Text(
-                                        'КОРЗИНА',
-                                        style: TextStyle(
-                                          color: t_primary,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.w500,
+                                ),
+                                SizedBox(width: 5),
+                                Text(
+                                  _price,
+                                  style: TextStyle(
+                                    color: t_primary,
+                                    fontSize: 35.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Stack(
+                              alignment: Alignment.centerRight,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 26),
+                                  child: Container(
+                                    width: 100,
+                                    height: 37,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black12,
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(20),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.only(right: 5),
+                                      child: Center(
+                                        child: Text(
+                                          'ЗАКАЗ',
+                                          style: TextStyle(
+                                            color: t_primary,
+                                            fontSize: 13.0,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              FloatingActionButton(
-                                elevation: 0,
-                                highlightElevation: 0,
-                                onPressed: () {
-                                  _addToCart(
-                                    foodNotifier.currentFood.imageHigh,
-                                    foodNotifier.currentFood.title,
-                                    _price,
-                                    foodNotifier.currentFood.description,
-                                    foodNotifier
-                                        .currentFood.subPrice[_selectedIndex],
-                                  );
-                                  _show(context);
-                                },
-                                child: Icon(Icons.add),
-                                backgroundColor: c_primary,
-                                mini: true,
-                              ),
-                            ],
-                          ),
-                        ],
+                                FloatingActionButton(
+                                  elevation: 0,
+                                  highlightElevation: 0,
+                                  onPressed: () {
+                                    _addToCart(
+                                      foodNotifier.currentFood.imageHigh,
+                                      foodNotifier.currentFood.title,
+                                      _price,
+                                      foodNotifier.currentFood.description,
+                                      foodNotifier
+                                          .currentFood.subPrice[_selectedIndex],
+                                    );
+                                    _show(context);
+                                  },
+                                  child: Icon(Icons.add),
+                                  backgroundColor: c_primary,
+                                  mini: true,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                       SizedBox(height: 5),
                       Container(
                         height: 80,
                         child: ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: 20.0),
                           scrollDirection: Axis.horizontal,
                           itemCount: foodNotifier.currentFood.subPrice.length,
                           itemBuilder: (context, index) {
@@ -243,44 +246,53 @@ class _FoodDetailState extends State<FoodDetail> {
                         ),
                       ),
                       SizedBox(height: 15),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
-                              foodNotifier.currentFood.title,
-                              style: TextStyle(
-                                color: t_primary,
-                                fontSize: 25.0,
-                                fontWeight: FontWeight.bold,
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 25.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                foodNotifier.currentFood.title,
+                                style: TextStyle(
+                                  color: t_primary,
+                                  fontSize: 25.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          foodNotifier.currentFood.description,
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.w400,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 25.0),
+                          child: Text(
+                            foodNotifier.currentFood.description,
+                            style: TextStyle(
+                              color: Colors.black54,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w400,
+                            ),
                           ),
                         ),
                       ),
                       SizedBox(height: 30),
                       foodNotifier.currentFood.subIngredients.isNotEmpty
-                          ? Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Ингредиенты',
-                                style: TextStyle(
-                                  color: t_primary,
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold,
+                          ? Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 25.0),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Ингредиенты',
+                                  style: TextStyle(
+                                    color: t_primary,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             )
@@ -288,7 +300,10 @@ class _FoodDetailState extends State<FoodDetail> {
                       SizedBox(height: 10),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: ChipItem(),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 25.0),
+                          child: ChipItem(),
+                        ),
                       ),
                       SizedBox(height: 20),
                     ],

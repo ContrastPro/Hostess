@@ -16,16 +16,8 @@ class ChipItem extends StatelessWidget {
             padding: EdgeInsets.all(10),
             backgroundColor: c_primary.withOpacity(0.2),
             elevation: 0,
-            /*avatar: Text(
-              '#',
-              style: TextStyle(
-                fontSize: 14.0,
-                color: c_primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),*/
             label: Text(
-              '#$ingredient',
+              ingredient,
               style: TextStyle(
                 fontSize: 14.0,
                 color: t_primary.withOpacity(0.9),

@@ -289,7 +289,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     AutoSizeText(
-                      profileNotifier.profileList[0].title.toUpperCase(),
+                      profileNotifier.profileList.isNotEmpty
+                          ? profileNotifier.profileList[0].title.toUpperCase()
+                          : '',
                       maxLines: 3,
                       textAlign: TextAlign.left,
                       minFontSize: 25,
@@ -310,9 +312,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Scaffold(
               backgroundColor: Colors.transparent,
               body: DraggableScrollableSheet(
-                initialChildSize: 0.13,
+                initialChildSize: 0.40,
                 maxChildSize: 0.80,
-                minChildSize: 0.13,
+                minChildSize: 0.20,
                 builder: (context, scrollController) {
                   return Container(
                     decoration: BoxDecoration(
@@ -337,9 +339,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                         alignment: Alignment.topLeft,
                                         child: Padding(
                                           padding: const EdgeInsets.only(
-                                              left: 30.0,
-                                              right: 30.0,
-                                              top: 40.0),
+                                            left: 30.0,
+                                            right: 30.0,
+                                            top: 40.0,
+                                          ),
                                           child: Text(
                                             'Меню',
                                             style: TextStyle(
