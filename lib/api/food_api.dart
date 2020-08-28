@@ -10,6 +10,7 @@ getFoods(FoodNotifier foodNotifier, String restaurant, String address,
       .collection('ru')
       .doc('Menu')
       .collection(category)
+      .orderBy('createdAt', descending: false)
       .get();
 
   List<Food> _foodList = [];

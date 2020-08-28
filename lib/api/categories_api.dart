@@ -10,6 +10,7 @@ getCategories(CategoriesNotifier categoriesNotifier, String restaurant,
       .collection('ru')
       .doc('Categories')
       .collection('Menu')
+      .orderBy('createdAt', descending: false)
       .get();
 
   List<Categories> _categoriesList = [];

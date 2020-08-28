@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Food {
   String id;
   String title;
@@ -6,6 +8,8 @@ class Food {
   String imageLow;
   List subIngredients = [];
   List subPrice = [];
+  Timestamp createdAt;
+  Timestamp updatedAt;
 
   Food();
 
@@ -17,6 +21,8 @@ class Food {
     imageLow = data['imageLow'];
     subIngredients = data['subIngredients'];
     subPrice = data['subPrice'];
+    createdAt = data['createdAt'];
+    updatedAt = data['updatedAt'];
   }
 
   Map<String, dynamic> toMap() {
@@ -28,6 +34,8 @@ class Food {
       'imageLow': imageLow,
       'subIngredients': subIngredients,
       'subPrice': subPrice,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt
     };
   }
 }

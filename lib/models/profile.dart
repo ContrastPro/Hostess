@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Profile {
   String id;
   String title;
   String address;
   String image;
   List subTime = [];
+  Timestamp createdAt;
+  Timestamp updatedAt;
 
   Profile();
 
@@ -13,6 +17,8 @@ class Profile {
     address = data['address'];
     image = data['image'];
     subTime = data['subTime'];
+    createdAt = data['createdAt'];
+    updatedAt = data['updatedAt'];
   }
 
   Map<String, dynamic> toMap() {
@@ -22,6 +28,8 @@ class Profile {
       'address': address,
       'image': image,
       'subTime': subTime,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt
     };
   }
 }
