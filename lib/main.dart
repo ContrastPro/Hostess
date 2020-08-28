@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hostess/notifier/food_notifier.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
 import 'package:hostess/screens/start_screen.dart';
 import 'package:provider/provider.dart';
@@ -12,9 +11,6 @@ void main() => runApp(
         providers: [
           ChangeNotifierProvider(
             create: (context) => CategoriesNotifier(),
-          ),
-          ChangeNotifierProvider(
-            create: (context) => FoodNotifier(),
           ),
           ChangeNotifierProvider(
             create: (context) => ProfileNotifier(),

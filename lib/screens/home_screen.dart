@@ -1,19 +1,18 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:hostess/api/categories_api.dart';
-import 'package:hostess/api/food_api.dart';
 import 'package:hostess/api/profile_api.dart';
 
 import 'package:hostess/global/colors.dart';
 
 import 'package:hostess/notifier/categories_notifier.dart';
-import 'package:hostess/notifier/food_notifier.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
+import 'package:hostess/screens/cart_screen.dart';
 import 'package:hostess/screens/details_screen.dart';
-import 'package:hostess/widgets/appbar_item.dart';
 
 import 'package:provider/provider.dart';
 
@@ -36,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _isExist = 1;
   int _selectedIndex = 0;
+  bool isClicked = false;
 
   @override
   void initState() {
@@ -78,11 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     CategoriesNotifier categoriesNotifier =
         Provider.of<CategoriesNotifier>(context);
-    FoodNotifier foodNotifier = Provider.of<FoodNotifier>(context);
-
-    Future<void> _refreshList(String category) async {
-      getFoods(foodNotifier, restaurant, address, category);
-    }
 
     Widget _time() {
       DateTime date = DateTime.now();
@@ -127,9 +122,6 @@ class _HomeScreenState extends State<HomeScreen> {
         pressElevation: 0.0,
         onSelected: (bool value) {
           _onSelected(index);
-          if (_selectedIndex != 0) {
-            _refreshList(categoriesNotifier.categoriesList[index].title);
-          }
         },
       );
     }
@@ -147,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    Widget _menuItem(int index) {
+    Widget _menuItem(int index, DocumentSnapshot document) {
       return Container(
         color: c_background,
         child: Padding(
@@ -156,11 +148,16 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 100,
             child: InkWell(
               onTap: () {
-                foodNotifier.currentFood = foodNotifier.foodList[index];
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FoodDetail(),
+                    builder: (context) => FoodDetail(
+                      id: document.data()['id'],
+                      restaurant: restaurant,
+                      address: address,
+                      categories: categoriesNotifier
+                          .categoriesList[_selectedIndex].title,
+                    ),
                   ),
                 );
               },
@@ -175,9 +172,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15.0),
                       ),
-                      child: foodNotifier.foodList[index].imageLow != null
+                      child: document.data()['imageLow'] != null
                           ? CachedNetworkImage(
-                              imageUrl: foodNotifier.foodList[index].imageLow,
+                              imageUrl: document.data()['imageLow'],
                               fit: BoxFit.cover,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) => Padding(
@@ -185,8 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: CircularProgressIndicator(
                                     value: downloadProgress.progress),
                               ),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
+                              errorWidget: (context, url, error) => Image.asset(
+                                  'assets/placeholder_1024.png',
+                                  fit: BoxFit.cover),
                             )
                           : Image.asset('assets/placeholder_1024.png',
                               fit: BoxFit.cover),
@@ -200,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            foodNotifier.foodList[index].title,
+                            document.data()['title'],
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -211,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           SizedBox(height: 5),
                           Text(
-                            foodNotifier.foodList[index].description,
+                            document.data()['description'],
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -238,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         SizedBox(width: 2),
-                        _price(foodNotifier.foodList[index].subPrice[0]),
+                        _price(document.data()['subPrice'][0]),
                       ],
                     ),
                   ),
@@ -250,170 +248,266 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
+    Widget _setMenu() {
+      return categoriesNotifier.categoriesList[_selectedIndex].title != null
+          ? StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection(restaurant)
+                  .doc(address)
+                  .collection('ru')
+                  .doc('Menu')
+                  .collection(
+                      categoriesNotifier.categoriesList[_selectedIndex].title)
+                  .orderBy('createdAt', descending: false)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Something went wrong'));
+                }
+
+                if (!snapshot.hasData) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 80.0),
+                    child: Center(
+                        child: CircularProgressIndicator(strokeWidth: 10)),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: EdgeInsets.only(
+                    left: 25.0,
+                    top: 0.0,
+                    right: 30.0,
+                    bottom: 20.0,
+                  ),
+                  itemCount: snapshot.data.documents.length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return _menuItem(index, snapshot.data.documents[index]);
+                  },
+                );
+              },
+            )
+          : Container();
+    }
+
     Widget _homeScreen() {
-      return Scaffold(
-        backgroundColor: c_secondary,
-        body: Stack(
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              child: profileNotifier.profileList[0].image != null
-                  ? CachedNetworkImage(
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      imageUrl: profileNotifier.profileList[0].image,
-                      placeholder: (context, url) => Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 50.0),
-                          child: CircularProgressIndicator(strokeWidth: 10),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Image.asset(
-                          'assets/placeholder_1024.png',
-                          fit: BoxFit.cover),
-                    )
-                  : Image.asset('assets/placeholder_1024.png',
-                      fit: BoxFit.cover),
-            ),
-            Container(
-              width: MediaQuery.of(context).size.width * 0.55,
-              height: double.infinity,
-              color: c_primary,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    AutoSizeText(
-                      profileNotifier.profileList.isNotEmpty
-                          ? profileNotifier.profileList[0].title.toUpperCase()
-                          : '',
-                      maxLines: 3,
-                      textAlign: TextAlign.left,
-                      minFontSize: 25,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 50.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    profileNotifier.profileList.isNotEmpty
-                        ? _time()
-                        : Container(),
-                  ],
-                ),
-              ),
-            ),
-            Scaffold(
-              backgroundColor: Colors.transparent,
-              body: DraggableScrollableSheet(
-                initialChildSize: 0.40,
-                maxChildSize: 0.80,
-                minChildSize: 0.20,
-                builder: (context, scrollController) {
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: c_background,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30.0),
-                        topRight: Radius.circular(30.0),
-                      ),
-                    ),
-                    child: CustomScrollView(
-                      controller: scrollController,
-                      slivers: <Widget>[
-                        SliverList(
-                          delegate: SliverChildListDelegate(
-                            <Widget>[
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Column(
-                                    children: <Widget>[
-                                      Align(
-                                        alignment: Alignment.topLeft,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 30.0,
-                                            right: 30.0,
-                                            top: 40.0,
-                                          ),
-                                          child: Text(
-                                            'Меню',
-                                            style: TextStyle(
-                                              color: t_primary,
-                                              fontSize: 30.0,
-                                              fontWeight: FontWeight.w900,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+      return profileNotifier.profileList.isNotEmpty
+          ? Scaffold(
+              backgroundColor: c_secondary,
+              body: Stack(
+                children: <Widget>[
+                  Container(
+                    width: double.infinity,
+                    height: double.infinity,
+                    child: profileNotifier.profileList[0].image != null
+                        ? CachedNetworkImage(
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            imageUrl: profileNotifier.profileList[0].image,
+                            placeholder: (context, url) => Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 50.0),
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 10),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Image.asset(
+                                'assets/placeholder_1024.png',
+                                fit: BoxFit.cover),
+                          )
+                        : Image.asset('assets/placeholder_1024.png',
+                            fit: BoxFit.cover),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.55,
+                    height: double.infinity,
+                    color: c_primary,
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
+                      child: Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: <Widget>[
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              AutoSizeText(
+                                '${profileNotifier.profileList[0].title}'
+                                    .toUpperCase(),
+                                maxLines: 3,
+                                textAlign: TextAlign.left,
+                                minFontSize: 25,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 50.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              profileNotifier.profileList.isNotEmpty
+                                  ? _time()
+                                  : Container(),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              FloatingActionButton.extended(
+                                heroTag: 'menu',
+                                onPressed: () => setState(
+                                  () => isClicked = !isClicked,
+                                ),
+                                icon: Icon(
+                                  Icons.restaurant_menu,
+                                  color: t_primary,
+                                ),
+                                label: Text(
+                                  'Меню',
+                                  style: TextStyle(
+                                    color: t_primary,
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  Container(
-                                    height: 80,
-                                    child: ListView.builder(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        scrollDirection: Axis.horizontal,
-                                        itemCount: categoriesNotifier
-                                            .categoriesList.length,
-                                        itemBuilder: (context, index) {
-                                          if (_selectedIndex == 0) {
-                                            _refreshList(categoriesNotifier
-                                                .categoriesList[0].title);
-                                          }
-                                          return Padding(
-                                            padding: EdgeInsets.all(5.0),
-                                            child: _chip(index),
-                                          );
-                                        }),
-                                  ),
-                                  Stack(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 100),
-                                        child: Center(
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 10),
-                                        ),
-                                      ),
-                                      ListView.builder(
-                                        padding: EdgeInsets.only(
-                                          left: 25.0,
-                                          top: 0.0,
-                                          right: 30.0,
-                                          bottom: 20.0,
-                                        ),
-                                        itemCount: foodNotifier.foodList.length,
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemBuilder: (context, index) {
-                                          return _menuItem(index);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                ),
+                                backgroundColor: c_background,
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  isClicked != false
+                      ? Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Container(
+                            width: double.infinity,
+                            height: MediaQuery.of(context).size.height * 0.80,
+                            decoration: BoxDecoration(
+                              color: c_background,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(30.0),
+                                topRight: Radius.circular(30.0),
+                              ),
+                            ),
+                            child: CustomScrollView(
+                              slivers: <Widget>[
+                                SliverList(
+                                  delegate: SliverChildListDelegate(
+                                    <Widget>[
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Column(
+                                            children: <Widget>[
+                                              Align(
+                                                alignment: Alignment.topLeft,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                    left: 30.0,
+                                                    right: 30.0,
+                                                    top: 40.0,
+                                                  ),
+                                                  child: Text(
+                                                    'Меню',
+                                                    style: TextStyle(
+                                                      color: t_primary,
+                                                      fontSize: 30.0,
+                                                      fontWeight:
+                                                          FontWeight.w900,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            height: 80,
+                                            child: ListView.builder(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                itemCount: categoriesNotifier
+                                                    .categoriesList.length,
+                                                itemBuilder: (context, index) {
+                                                  return Padding(
+                                                    padding:
+                                                        EdgeInsets.all(5.0),
+                                                    child: _chip(index),
+                                                  );
+                                                }),
+                                          ),
+                                          _setMenu(),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
                         )
+                      : Container(),
+                  SafeArea(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        isClicked != false
+                            ? Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10.0, vertical: 20.0),
+                                child: RawMaterialButton(
+                                  onPressed: () => setState(() {
+                                    isClicked = !isClicked;
+                                  }),
+                                  fillColor: c_secondary.withOpacity(0.5),
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Colors.white,
+                                  ),
+                                  padding: EdgeInsets.all(13.0),
+                                  shape: CircleBorder(),
+                                ),
+                              )
+                            : Container(),
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 20.0),
+                          child: RawMaterialButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CartScreen(),
+                                ),
+                              );
+                            },
+                            fillColor: c_secondary.withOpacity(0.5),
+                            child: Icon(
+                              Icons.shopping_cart,
+                              color: Colors.white,
+                            ),
+                            padding: EdgeInsets.all(13.0),
+                            shape: CircleBorder(),
+                          ),
+                        ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ),
-            CustomAppBar(),
-          ],
-        ),
-      );
+            )
+          : Scaffold(
+              body: Center(child: CircularProgressIndicator(strokeWidth: 10)));
     }
 
     Widget _setWidget() {
