@@ -1,7 +1,6 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:hostess/api/categories_api.dart';
@@ -116,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     Widget _chip(int index) {
       return FilterChip(
-        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         label: Text(
           categoriesNotifier.categoriesList[index].title,
           style: TextStyle(
@@ -416,7 +415,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     Container(
                                       height: 80,
                                       child: ListView.builder(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               horizontal: 10),
                                           scrollDirection: Axis.horizontal,
                                           itemCount: categoriesNotifier
@@ -439,14 +438,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ),
                   SafeArea(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 20.0),
-                          child: FloatingActionButton.extended(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 20.0, left: 18.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          FloatingActionButton.extended(
                             elevation: 2,
                             focusElevation: 4,
                             hoverElevation: 4,
@@ -475,11 +473,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                             backgroundColor: c_secondary.withOpacity(0.5),
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 20.0),
-                          child: RawMaterialButton(
+                          RawMaterialButton(
                             onPressed: () async {
                               await Navigator.push(
                                 context,
@@ -489,7 +483,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               );
                               _isEmptyCart();
                             },
-                            fillColor: c_secondary.withOpacity(0.5),
+                            fillColor: c_secondary.withOpacity(.5),
                             child: Stack(
                               alignment: Alignment.topRight,
                               children: [
@@ -509,11 +503,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     : SizedBox(),
                               ],
                             ),
-                            padding: EdgeInsets.all(15.0),
+                            padding: EdgeInsets.all(13.0),
                             shape: CircleBorder(),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],

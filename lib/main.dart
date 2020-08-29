@@ -28,6 +28,7 @@ class MyApp extends StatelessWidget {
       title: 'Hostess',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
+        brightness: Brightness.light,
       ),
       home: CheckConnection(),
     );

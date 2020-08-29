@@ -256,14 +256,13 @@ class _CartScreenState extends State<CartScreen> {
             ),
           ),
           SafeArea(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                  child: RawMaterialButton(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20.0, right: 20.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  RawMaterialButton(
                     onPressed: () => Navigator.pop(context),
                     fillColor: c_secondary.withOpacity(0.5),
                     child: Icon(
@@ -273,10 +272,7 @@ class _CartScreenState extends State<CartScreen> {
                     padding: EdgeInsets.all(13.0),
                     shape: CircleBorder(),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Row(
+                  Row(
                     children: [
                       Text(
                         'Мой',
@@ -297,8 +293,8 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           Align(

@@ -168,11 +168,12 @@ class _FoodDetailState extends State<FoodDetail> {
                       ),
                       child: SingleChildScrollView(
                         controller: scrollController,
-                        padding: EdgeInsets.symmetric(vertical: 30.0),
+                        padding: const EdgeInsets.symmetric(vertical: 30.0),
                         child: Column(
                           children: <Widget>[
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 25.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 25.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -217,7 +218,8 @@ class _FoodDetailState extends State<FoodDetail> {
                                             ),
                                           ),
                                           child: Padding(
-                                            padding: EdgeInsets.only(right: 5),
+                                            padding:
+                                                const EdgeInsets.only(right: 5),
                                             child: Center(
                                               child: Text(
                                                 'ЗАКАЗ',
@@ -257,7 +259,8 @@ class _FoodDetailState extends State<FoodDetail> {
                             Container(
                               height: 80,
                               child: ListView.builder(
-                                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
                                 scrollDirection: Axis.horizontal,
                                 itemCount: data['subPrice'].length,
                                 itemBuilder: (context, index) {
@@ -265,8 +268,8 @@ class _FoodDetailState extends State<FoodDetail> {
                                       data['subPrice'][index].split('#');
                                   _amount = splitRes[0];
                                   return FilterChip(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 8.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
                                     label: Text(
                                       '$_amount',
                                       style: TextStyle(
@@ -296,7 +299,8 @@ class _FoodDetailState extends State<FoodDetail> {
                             ),
                             SizedBox(height: 15),
                             Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 25.0),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 25.0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -319,7 +323,8 @@ class _FoodDetailState extends State<FoodDetail> {
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 25.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 25.0),
                                 child: Text(
                                   '${data['description']}',
                                   style: TextStyle(
@@ -333,8 +338,8 @@ class _FoodDetailState extends State<FoodDetail> {
                             SizedBox(height: 30),
                             data['subIngredients'].isNotEmpty
                                 ? Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 25.0),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 25.0),
                                     child: Align(
                                       alignment: Alignment.centerLeft,
                                       child: Text(
@@ -352,7 +357,8 @@ class _FoodDetailState extends State<FoodDetail> {
                             Align(
                               alignment: Alignment.centerLeft,
                               child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 25.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 25.0),
                                 child: Wrap(children: _buildListIngredients()),
                               ),
                             ),
@@ -365,13 +371,13 @@ class _FoodDetailState extends State<FoodDetail> {
                 ),
               ),
               SafeArea(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 20.0),
-                      child: RawMaterialButton(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      RawMaterialButton(
                         onPressed: () => Navigator.pop(context),
                         fillColor: c_secondary.withOpacity(0.5),
                         child: Icon(
@@ -381,11 +387,7 @@ class _FoodDetailState extends State<FoodDetail> {
                         padding: EdgeInsets.all(13.0),
                         shape: CircleBorder(),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 20.0),
-                      child: RawMaterialButton(
+                      RawMaterialButton(
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -402,8 +404,8 @@ class _FoodDetailState extends State<FoodDetail> {
                         padding: EdgeInsets.all(13.0),
                         shape: CircleBorder(),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
