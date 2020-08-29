@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hostess/api/categories_api.dart';
 import 'package:hostess/api/profile_api.dart';
+import 'package:hostess/database/db_cart.dart';
 
 import 'package:hostess/global/colors.dart';
 
@@ -27,7 +28,7 @@ class HomeScreen extends StatefulWidget {
       _HomeScreenState(restaurant: restaurant, address: address);
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final String restaurant;
   final String address;
 
@@ -35,7 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   int _isExist = 1;
   int _selectedIndex = 0;
+  int _total;
   bool isClicked = false;
+  AnimationController _animationController;
 
   @override
   void initState() {
@@ -47,6 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
     CategoriesNotifier categoriesNotifier =
         Provider.of<CategoriesNotifier>(context, listen: false);
     getCategories(categoriesNotifier, restaurant, address);
+
+    _animationController =
+        AnimationController(vsync: this, duration: Duration(seconds: 1));
+    _isEmptyCart();
     super.initState();
   }
 
@@ -66,6 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     });
+  }
+
+  _isEmptyCart() async {
+    int total = await MastersDatabaseProvider.db.calculateTotal();
+    setState(() => _total = total);
   }
 
   _onSelected(int index) {
@@ -118,7 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: _selectedIndex != null && _selectedIndex == index
             ? c_primary
             : Colors.white.withOpacity(0),
-        elevation: 0.0,
+        elevation:
+            _selectedIndex != null && _selectedIndex == index ? 0.0 : 2.0,
         pressElevation: 0.0,
         onSelected: (bool value) {
           _onSelected(index);
@@ -147,8 +160,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             height: 100,
             child: InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => FoodDetail(
@@ -160,6 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 );
+                _isEmptyCart();
               },
               child: Row(
                 children: <Widget>[
@@ -289,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             )
-          : Container();
+          : SizedBox();
     }
 
     Widget _homeScreen() {
@@ -329,174 +343,173 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Padding(
                       padding:
                           const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
-                      child: Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: <Widget>[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AutoSizeText(
-                                '${profileNotifier.profileList[0].title}'
-                                    .toUpperCase(),
-                                maxLines: 3,
-                                textAlign: TextAlign.left,
-                                minFontSize: 25,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 50.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              profileNotifier.profileList.isNotEmpty
-                                  ? _time()
-                                  : Container(),
-                            ],
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AutoSizeText(
+                            '${profileNotifier.profileList[0].title}'
+                                .toUpperCase(),
+                            maxLines: 3,
+                            textAlign: TextAlign.left,
+                            minFontSize: 25,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 50.0,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              FloatingActionButton.extended(
-                                heroTag: 'menu',
-                                onPressed: () => setState(
-                                  () => isClicked = !isClicked,
-                                ),
-                                icon: Icon(
-                                  Icons.restaurant_menu,
-                                  color: t_primary,
-                                ),
-                                label: Text(
-                                  'Меню',
-                                  style: TextStyle(
-                                    color: t_primary,
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                backgroundColor: c_background,
-                              ),
-                            ],
-                          ),
+                          SizedBox(height: 20),
+                          profileNotifier.profileList.isNotEmpty
+                              ? _time()
+                              : Container(),
                         ],
                       ),
                     ),
                   ),
-                  isClicked != false
-                      ? Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            width: double.infinity,
-                            height: MediaQuery.of(context).size.height * 0.80,
-                            decoration: BoxDecoration(
-                              color: c_background,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(30.0),
-                                topRight: Radius.circular(30.0),
-                              ),
-                            ),
-                            child: CustomScrollView(
-                              slivers: <Widget>[
-                                SliverList(
-                                  delegate: SliverChildListDelegate(
-                                    <Widget>[
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Column(
-                                            children: <Widget>[
-                                              Align(
-                                                alignment: Alignment.topLeft,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                    left: 30.0,
-                                                    right: 30.0,
-                                                    top: 40.0,
-                                                  ),
-                                                  child: Text(
-                                                    'Меню',
-                                                    style: TextStyle(
-                                                      color: t_primary,
-                                                      fontSize: 30.0,
-                                                      fontWeight:
-                                                          FontWeight.w900,
-                                                    ),
-                                                  ),
-                                                ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AnimatedContainer(
+                      width: double.infinity,
+                      height: isClicked
+                          ? MediaQuery.of(context).size.height * 0.80
+                          : 0.0,
+                      duration: Duration(seconds: 1),
+                      curve: Curves.fastOutSlowIn,
+                      decoration: BoxDecoration(
+                        color: c_background,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30.0),
+                          topRight: Radius.circular(30.0),
+                        ),
+                      ),
+                      child: CustomScrollView(
+                        slivers: <Widget>[
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              <Widget>[
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Column(
+                                      children: <Widget>[
+                                        Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 30.0,
+                                              right: 30.0,
+                                              top: 40.0,
+                                            ),
+                                            child: Text(
+                                              'Меню',
+                                              style: TextStyle(
+                                                color: t_primary,
+                                                fontSize: 30.0,
+                                                fontWeight: FontWeight.w900,
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                          Container(
-                                            height: 80,
-                                            child: ListView.builder(
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 10),
-                                                scrollDirection:
-                                                    Axis.horizontal,
-                                                itemCount: categoriesNotifier
-                                                    .categoriesList.length,
-                                                itemBuilder: (context, index) {
-                                                  return Padding(
-                                                    padding:
-                                                        EdgeInsets.all(5.0),
-                                                    child: _chip(index),
-                                                  );
-                                                }),
-                                          ),
-                                          _setMenu(),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                )
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      height: 80,
+                                      child: ListView.builder(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: categoriesNotifier
+                                              .categoriesList.length,
+                                          itemBuilder: (context, index) {
+                                            return Padding(
+                                              padding: EdgeInsets.all(5.0),
+                                              child: _chip(index),
+                                            );
+                                          }),
+                                    ),
+                                    _setMenu(),
+                                  ],
+                                ),
                               ],
                             ),
-                          ),
-                        )
-                      : Container(),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
                   SafeArea(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        isClicked != false
-                            ? Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10.0, vertical: 20.0),
-                                child: RawMaterialButton(
-                                  onPressed: () => setState(() {
-                                    isClicked = !isClicked;
-                                  }),
-                                  fillColor: c_secondary.withOpacity(0.5),
-                                  child: Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                  ),
-                                  padding: EdgeInsets.all(13.0),
-                                  shape: CircleBorder(),
-                                ),
-                              )
-                            : Container(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10.0, vertical: 20.0),
+                          child: FloatingActionButton.extended(
+                            elevation: 2,
+                            focusElevation: 4,
+                            hoverElevation: 4,
+                            highlightElevation: 8,
+                            heroTag: 'menu',
+                            onPressed: () {
+                              setState(() {
+                                isClicked = !isClicked;
+                                isClicked
+                                    ? _animationController.forward()
+                                    : _animationController.reverse();
+                              });
+                            },
+                            icon: AnimatedIcon(
+                              icon: AnimatedIcons.menu_close,
+                              color: Colors.white,
+                              progress: _animationController,
+                            ),
+                            label: Text(
+                              'Меню',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            backgroundColor: c_secondary.withOpacity(0.5),
+                          ),
+                        ),
                         Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: 10.0, vertical: 20.0),
                           child: RawMaterialButton(
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => CartScreen(),
                                 ),
                               );
+                              _isEmptyCart();
                             },
                             fillColor: c_secondary.withOpacity(0.5),
-                            child: Icon(
-                              Icons.shopping_cart,
-                              color: Colors.white,
+                            child: Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                Icon(
+                                  Icons.shopping_cart,
+                                  color: Colors.white,
+                                ),
+                                _total != null
+                                    ? Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: BoxDecoration(
+                                          color: Colors.deepOrange[900],
+                                          shape: BoxShape.circle,
+                                        ),
+                                      )
+                                    : SizedBox(),
+                              ],
                             ),
-                            padding: EdgeInsets.all(13.0),
+                            padding: EdgeInsets.all(15.0),
                             shape: CircleBorder(),
                           ),
                         ),

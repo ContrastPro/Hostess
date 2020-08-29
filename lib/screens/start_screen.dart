@@ -159,6 +159,10 @@ class _StartScreenState extends State<StartScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 80.0, 20.0, 0.0),
                   child: FloatingActionButton.extended(
+                    elevation: 2,
+                    focusElevation: 4,
+                    hoverElevation: 4,
+                    highlightElevation: 8,
                     onPressed: () => _testDialog(context),
                     icon: Icon(
                       Icons.camera_enhance,
