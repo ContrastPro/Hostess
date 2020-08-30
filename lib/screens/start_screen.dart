@@ -19,7 +19,7 @@ class _StartScreenState extends State<StartScreen> {
         SystemUiOverlayStyle(statusBarColor: Colors.transparent));
   }
 
-  bool _scan = false;
+  /*bool _scan = false;*/
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class _StartScreenState extends State<StartScreen> {
       );
     }
 
-    Future<void> _scanQR() async {
+    /* Future<void> _testScanQR() async {
       var barcodeScanRes;
       if (_scan == false) {
         barcodeScanRes = 'Jardin//Одесса, ул. Гаванная 10';
@@ -83,7 +83,7 @@ class _StartScreenState extends State<StartScreen> {
             _scan = false;
           });
           Navigator.of(context).pop();
-          _scanQR();
+          _testScanQR();
         },
       );
       Widget continueButton = FlatButton(
@@ -93,7 +93,7 @@ class _StartScreenState extends State<StartScreen> {
             _scan = true;
           });
           Navigator.of(context).pop();
-          _scanQR();
+          _testScanQR();
         },
       );
 
@@ -114,6 +114,36 @@ class _StartScreenState extends State<StartScreen> {
           return alert;
         },
       );
+    }*/
+
+    Future<void> _scanQR() async {
+      var barcodeScanRes;
+      try {
+        barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          "#ff6666",
+          "Отмена",
+          true,
+          ScanMode.QR,
+        );
+      } on PlatformException {
+        barcodeScanRes = 'Failed to get platform version.';
+      }
+      if (!mounted) return;
+
+      if (barcodeScanRes.contains('//')) {
+        List<String> splitRes = barcodeScanRes.split('//');
+        String _restaurant = splitRes[0];
+        String _address = splitRes[1];
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(restaurant: _restaurant, address: _address),
+          ),
+        );
+      } else {
+        _showAlertDialog(context);
+      }
     }
 
     return Scaffold(
@@ -163,7 +193,8 @@ class _StartScreenState extends State<StartScreen> {
                     focusElevation: 4,
                     hoverElevation: 4,
                     highlightElevation: 8,
-                    onPressed: () => _testDialog(context),
+                    onPressed: () => _scanQR(),
+                    /*onPressed: () => _testDialog(context),*/
                     icon: Icon(
                       Icons.camera_enhance,
                       color: t_primary,

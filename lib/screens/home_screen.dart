@@ -196,10 +196,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     value: downloadProgress.progress),
                               ),
                               errorWidget: (context, url, error) => Image.asset(
-                                  'assets/placeholder_1024.png',
+                                  'assets/placeholder_200.png',
                                   fit: BoxFit.cover),
                             )
-                          : Image.asset('assets/placeholder_1024.png',
+                          : Image.asset('assets/placeholder_200.png',
                               fit: BoxFit.cover),
                     ),
                   ),
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                 if (!snapshot.hasData) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 80.0),
+                    padding: const EdgeInsets.only(top: 100.0),
                     child: Center(
                         child: CircularProgressIndicator(strokeWidth: 10)),
                   );
@@ -329,8 +329,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               ),
                             ),
                             errorWidget: (context, url, error) => Image.asset(
-                                'assets/placeholder_1024.png',
-                                fit: BoxFit.cover),
+                              'assets/placeholder_1024.png',
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
                           )
                         : Image.asset('assets/placeholder_1024.png',
                             fit: BoxFit.cover),
