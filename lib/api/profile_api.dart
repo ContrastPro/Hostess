@@ -6,7 +6,7 @@ getProfile(
     ProfileNotifier profileNotifier, String restaurant, String address) async {
   QuerySnapshot snapshot = await FirebaseFirestore.instance
       .collection(restaurant)
-      .where('address', isEqualTo: address)
+      .where('id', isEqualTo: address)
       .get();
 
   List<Profile> _profileList = [];

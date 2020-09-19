@@ -362,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                           ),
                           SizedBox(height: 20),
-                          profileNotifier.profileList.isNotEmpty
+                          profileNotifier.profileList[0].subTime != null
                               ? _time()
                               : Container(),
                         ],

@@ -19,7 +19,7 @@ class _StartScreenState extends State<StartScreen> {
         SystemUiOverlayStyle(statusBarColor: Colors.transparent));
   }
 
-  /*bool _scan = false;*/
+  bool _scan = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +41,10 @@ class _StartScreenState extends State<StartScreen> {
       );
     }
 
-    /* Future<void> _testScanQR() async {
+     Future<void> _testScanQR() async {
       var barcodeScanRes;
       if (_scan == false) {
-        barcodeScanRes = 'Jardin//Одесса, ул. Гаванная 10';
+        barcodeScanRes = 'kcPUo1hVcOShQQychzNdyw7Du9h1//4fibItto27xzlJb5elJm';
       } else {
         try {
           barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -114,7 +114,7 @@ class _StartScreenState extends State<StartScreen> {
           return alert;
         },
       );
-    }*/
+    }
 
     Future<void> _scanQR() async {
       var barcodeScanRes;
