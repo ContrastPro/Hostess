@@ -44,7 +44,7 @@ class _StartScreenState extends State<StartScreen> {
      Future<void> _testScanQR() async {
       var barcodeScanRes;
       if (_scan == false) {
-        barcodeScanRes = 'kcPUo1hVcOShQQychzNdyw7Du9h1//4fibItto27xzlJb5elJm';
+        barcodeScanRes = 'zY31D7xo2pQWXjAkQz2L6NOnIkR2//iOACZRNjMVD6ISDm6zjd';
       } else {
         try {
           barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -194,7 +194,7 @@ class _StartScreenState extends State<StartScreen> {
                     hoverElevation: 4,
                     highlightElevation: 8,
                     onPressed: () => _scanQR(),
-                    /*onPressed: () => _testDialog(context),*/
+                    //onPressed: () => _testDialog(context),
                     icon: Icon(
                       Icons.camera_enhance,
                       color: t_primary,
