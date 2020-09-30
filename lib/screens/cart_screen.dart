@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hostess/database/db_cart.dart';
@@ -56,98 +58,125 @@ class _CartScreenState extends State<CartScreen> {
     );
   }
 
-  Widget _cartItem(int id, String image, String title, int price,
-      String description, String amount) {
-    return InkWell(
-      onTap: () {
-        _showAlertDialog(
-          title,
-          description,
-          amount,
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 20),
-        height: 120,
-        child: Row(
-          children: <Widget>[
-            Container(
-              width: 100,
-              height: 100,
-              child: Card(
-                semanticContainer: true,
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                child: image != null
-                    ? CachedNetworkImage(
-                        fit: BoxFit.cover,
-                        imageUrl: image,
-                        errorWidget: (context, url, error) => Image.asset(
-                            'assets/placeholder_200.png',
-                            fit: BoxFit.cover),
-                      )
-                    : Image.asset('assets/placeholder_200.png',
-                        fit: BoxFit.cover),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20.0, 5.0, 10.0, 5.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "$title",
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: t_primary,
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
+  Widget _orderList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        FutureBuilder<List<Cart>>(
+          future: MastersDatabaseProvider.db.getAllCart(),
+          builder: (BuildContext context, AsyncSnapshot<List<Cart>> snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                padding: EdgeInsets.symmetric(vertical: 20.0),
+                reverse: true,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Cart item = snapshot.data[index];
+
+                  return InkWell(
+                    onTap: () {
+                      _showAlertDialog(
+                        item.title,
+                        item.description,
+                        item.amount,
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 20),
+                      height: 120,
+                      child: Row(
+                        children: <Widget>[
+                          Container(
+                            width: 100,
+                            height: 100,
+                            child: Card(
+                              semanticContainer: true,
+                              clipBehavior: Clip.antiAliasWithSaveLayer,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: item.image != null
+                                  ? CachedNetworkImage(
+                                      fit: BoxFit.cover,
+                                      imageUrl: item.image,
+                                      errorWidget: (context, url, error) =>
+                                          Image.asset(
+                                              'assets/placeholder_200.png',
+                                              fit: BoxFit.cover),
+                                    )
+                                  : Image.asset('assets/placeholder_200.png',
+                                      fit: BoxFit.cover),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20.0, 5.0, 10.0, 5.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    "${item.title}",
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: t_primary,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        '₴',
+                                        style: TextStyle(
+                                          color: t_primary,
+                                          fontSize: 16.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      SizedBox(width: 2),
+                                      Text(
+                                        "${item.price}",
+                                        style: TextStyle(
+                                            color: t_primary,
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          RawMaterialButton(
+                            onPressed: () {
+                              MastersDatabaseProvider.db
+                                  .deleteItemWithId(item.id);
+                              _calculateTotal();
+                            },
+                            fillColor: Colors.white,
+                            child: Icon(Icons.delete_outline),
+                            padding: EdgeInsets.all(10.0),
+                            shape: CircleBorder(),
+                          )
+                        ],
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          '₴',
-                          style: TextStyle(
-                            color: t_primary,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        SizedBox(width: 2),
-                        Text(
-                          "$price",
-                          style: TextStyle(
-                              color: t_primary,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            RawMaterialButton(
-              onPressed: () {
-                MastersDatabaseProvider.db.deleteItemWithId(id);
-                _calculateTotal();
-              },
-              fillColor: Colors.white,
-              child: Icon(Icons.delete_outline),
-              padding: EdgeInsets.all(10.0),
-              shape: CircleBorder(),
-            )
-          ],
+                  );
+                },
+              );
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },
         ),
-      ),
+      ],
     );
   }
 
@@ -174,43 +203,7 @@ class _CartScreenState extends State<CartScreen> {
                     delegate: SliverChildListDelegate(
                       <Widget>[
                         _total != null
-                            ? Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  FutureBuilder<List<Cart>>(
-                                    future:
-                                        MastersDatabaseProvider.db.getAllCart(),
-                                    builder: (BuildContext context,
-                                        AsyncSnapshot<List<Cart>> snapshot) {
-                                      if (snapshot.hasData) {
-                                        return ListView.builder(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 20.0),
-                                          reverse: true,
-                                          shrinkWrap: true,
-                                          physics:
-                                              NeverScrollableScrollPhysics(),
-                                          itemCount: snapshot.data.length,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            Cart item = snapshot.data[index];
-                                            return _cartItem(
-                                                item.id,
-                                                item.image,
-                                                item.title,
-                                                item.price,
-                                                item.description,
-                                                item.amount);
-                                          },
-                                        );
-                                      } else {
-                                        return Center(
-                                            child: CircularProgressIndicator());
-                                      }
-                                    },
-                                  ),
-                                ],
-                              )
+                            ? _orderList()
                             : Column(
                                 children: [
                                   SizedBox(height: 40.0),

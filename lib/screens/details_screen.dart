@@ -8,19 +8,20 @@ import 'package:hostess/models/cart.dart';
 import 'package:hostess/screens/cart_screen.dart';
 
 class FoodDetail extends StatefulWidget {
-  final String id, restaurant, address, categories;
+  final String id, uid, address, language, categories;
 
-  FoodDetail({this.id, this.restaurant, this.address, this.categories});
+  FoodDetail({this.id, this.uid, this.address, this.language, this.categories});
 
   @override
   _FoodDetailState createState() =>
-      _FoodDetailState(id, restaurant, address, categories);
+      _FoodDetailState(id, uid, address, language, categories);
 }
 
 class _FoodDetailState extends State<FoodDetail> {
-  final String id, restaurant, address, categories;
+  final String id, uid, address, language, categories;
 
-  _FoodDetailState(this.id, this.restaurant, this.address, this.categories);
+  _FoodDetailState(
+      this.id, this.uid, this.address, this.language, this.categories);
 
   int _selectedIndex = 0;
   String _price, _amount;
@@ -62,9 +63,9 @@ class _FoodDetailState extends State<FoodDetail> {
   @override
   Widget build(BuildContext context) {
     CollectionReference detailDish = FirebaseFirestore.instance
-        .collection(restaurant)
+        .collection(uid)
         .doc(address)
-        .collection('ru')
+        .collection(language)
         .doc('Menu')
         .collection(categories);
 
@@ -288,10 +289,12 @@ class _FoodDetailState extends State<FoodDetail> {
                                     elevation: 0.0,
                                     pressElevation: 0.0,
                                     onSelected: (bool value) {
-                                      _onSelected(
-                                        index,
-                                        data['subPrice'][index],
-                                      );
+                                      if (_selectedIndex != index) {
+                                        _onSelected(
+                                          index,
+                                          data['subPrice'][index],
+                                        );
+                                      }
                                     },
                                   );
                                 },

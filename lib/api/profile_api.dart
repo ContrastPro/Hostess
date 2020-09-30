@@ -2,10 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hostess/models/profile.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
 
-getProfile(
-    ProfileNotifier profileNotifier, String restaurant, String address) async {
+getProfile(ProfileNotifier profileNotifier, String uid, String address) async {
   QuerySnapshot snapshot = await FirebaseFirestore.instance
-      .collection(restaurant)
+      .collection(uid)
       .where('id', isEqualTo: address)
       .get();
 

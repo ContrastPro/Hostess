@@ -15,50 +15,44 @@ import 'package:hostess/screens/cart_screen.dart';
 import 'package:hostess/screens/details_screen.dart';
 
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
-  final String restaurant;
+  final String uid;
   final String address;
 
-  HomeScreen({this.restaurant, this.address});
+  HomeScreen({this.uid, this.address});
 
   @override
   _HomeScreenState createState() =>
-      _HomeScreenState(restaurant: restaurant, address: address);
+      _HomeScreenState(uid: uid, address: address);
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  final String restaurant;
+  final String uid;
   final String address;
 
-  _HomeScreenState({this.restaurant, this.address});
+  _HomeScreenState({this.uid, this.address});
 
   int _isExist = 1;
   int _selectedIndex = 0;
   int _total;
-  bool isClicked = false;
+  bool _isClicked = false;
+  bool _isClickedLang = false;
+  String _language;
   AnimationController _animationController;
 
   @override
   void initState() {
-    _load();
-    ProfileNotifier profileNotifier =
-        Provider.of<ProfileNotifier>(context, listen: false);
-    getProfile(profileNotifier, restaurant, address);
-
-    CategoriesNotifier categoriesNotifier =
-        Provider.of<CategoriesNotifier>(context, listen: false);
-    getCategories(categoriesNotifier, restaurant, address);
-
+    _preLoad();
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 1));
-    _isEmptyCart();
     super.initState();
   }
 
-  Future<void> _load() async {
+  Future<void> _preLoad() async {
     await FirebaseFirestore.instance
-        .collection(restaurant)
+        .collection(uid)
         .doc(address)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
@@ -66,12 +60,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         setState(() {
           _isExist = 0;
         });
+        _load();
+        _isEmptyCart();
       } else {
         setState(() {
           _isExist = 2;
         });
       }
     });
+  }
+
+  _load() async {
+    ProfileNotifier profileNotifier =
+        Provider.of<ProfileNotifier>(context, listen: false);
+    await getProfile(profileNotifier, uid, address);
+    CategoriesNotifier categoriesNotifier =
+        Provider.of<CategoriesNotifier>(context, listen: false);
+    getCategories(categoriesNotifier, uid, address,
+        profileNotifier.profileList[0].subLanguages[0]);
+
+    setState(() => _language = profileNotifier.profileList[0].subLanguages[0]);
   }
 
   _isEmptyCart() async {
@@ -83,12 +91,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() => _selectedIndex = index);
   }
 
+  _launchMap(String openMap) async {
+    String url =
+        'https://www.google.com/maps/search/${Uri.encodeFull(openMap)}';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  _makePhoneCall(String openPhone) async {
+    if (await canLaunch(openPhone)) {
+      await launch(openPhone);
+    } else {
+      throw 'Could not launch $openPhone';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     ProfileNotifier profileNotifier = Provider.of<ProfileNotifier>(context);
 
     CategoriesNotifier categoriesNotifier =
         Provider.of<CategoriesNotifier>(context);
+
+    double _size() {
+      if (_isClickedLang) {
+        switch (profileNotifier.profileList[0].subLanguages.length) {
+          case 1:
+            return 60.0;
+
+            break;
+          case 2:
+            return 100.0;
+
+            break;
+          default:
+            return 140.0;
+
+            break;
+        }
+      } else {
+        return 18.0;
+      }
+    }
 
     Widget _time() {
       DateTime date = DateTime.now();
@@ -98,15 +145,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           Icon(
             Icons.access_time,
             color: Colors.white,
-            size: 18.0,
           ),
           SizedBox(width: 10),
-          Text(
-            profileNotifier.profileList[0].subTime[date.weekday - 1],
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18.0,
-              fontWeight: FontWeight.normal,
+          Expanded(
+            child: Text(
+              profileNotifier.profileList[0].subTime[date.weekday - 1],
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.w300,
+              ),
             ),
           ),
         ],
@@ -165,8 +213,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   MaterialPageRoute(
                     builder: (context) => FoodDetail(
                       id: document.data()['id'],
-                      restaurant: restaurant,
+                      uid: uid,
                       address: address,
+                      language: _language,
                       categories: categoriesNotifier
                           .categoriesList[_selectedIndex].title,
                     ),
@@ -262,12 +311,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     Widget _setMenu() {
-      return categoriesNotifier.categoriesList[_selectedIndex].title != null
+      return categoriesNotifier.categoriesList.isNotEmpty
           ? StreamBuilder(
               stream: FirebaseFirestore.instance
-                  .collection(restaurant)
+                  .collection(uid)
                   .doc(address)
-                  .collection('ru')
+                  .collection(_language)
                   .doc('Menu')
                   .collection(
                       categoriesNotifier.categoriesList[_selectedIndex].title)
@@ -302,7 +351,369 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 );
               },
             )
-          : SizedBox();
+          : Column(
+              children: [
+                SizedBox(height: 40.0),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Text(
+                    'Упс...',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: t_primary,
+                      fontSize: 25.0,
+                      letterSpacing: 1.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
+                  child: Text(
+                    'Похоже меню на языке "${_language.toUpperCase()}" всё ещё в разработке. Выберите другой язык!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: t_primary.withOpacity(0.5),
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
+            );
+    }
+
+    Widget _setLanguage() {
+      return Stack(
+        children: [
+          AnimatedContainer(
+            duration: Duration(seconds: 1),
+            curve: Curves.fastOutSlowIn,
+            width: _size(),
+            height: 36,
+            decoration: BoxDecoration(
+              color: c_secondary.withOpacity(0.6),
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(30.0),
+                bottomRight: Radius.circular(30.0),
+              ),
+            ),
+            margin: EdgeInsets.only(left: 18),
+            child: ListView.builder(
+                reverse: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: profileNotifier.profileList[0].subLanguages.length,
+                padding: EdgeInsets.only(left: 25),
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5.0,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _language = profileNotifier
+                              .profileList[0].subLanguages[index];
+                          _isClickedLang = !_isClickedLang;
+                        });
+                        getCategories(
+                            categoriesNotifier, uid, address, _language);
+                      },
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        child: Image.asset(
+                            'assets/${profileNotifier.profileList[0].subLanguages[index]}.png'),
+                      ),
+                    ),
+                  );
+                }),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: GestureDetector(
+              onTap: () => setState(() => _isClickedLang = !_isClickedLang),
+              child: Container(
+                width: 36,
+                height: 36,
+                child: Image.asset('assets/$_language.png'),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget _backSide() {
+      return Stack(
+        children: [
+          Container(
+            width: double.infinity,
+            height: double.infinity,
+            child: profileNotifier.profileList[0].image != null
+                ? CachedNetworkImage(
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
+                    imageUrl: profileNotifier.profileList[0].image,
+                    placeholder: (context, url) => Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 50.0),
+                        child: CircularProgressIndicator(strokeWidth: 10),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Image.asset(
+                      'assets/placeholder_1024.png',
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset('assets/placeholder_1024.png', fit: BoxFit.cover),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.55,
+            height: double.infinity,
+            color: c_primary,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  AutoSizeText(
+                    '${profileNotifier.profileList[0].title}'.toUpperCase(),
+                    maxLines: 3,
+                    textAlign: TextAlign.left,
+                    minFontSize: 25,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 50.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 35),
+                  GestureDetector(
+                    onTap: () => _launchMap(
+                        profileNotifier.profileList[0].title +
+                            ",\t" +
+                            profileNotifier.profileList[0].address),
+                    /*onTap: () => _launchMap(
+                                "Jardin" + ",\t" + "Одесса, ул. Гаванная 10"),*/
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          color: Colors.white,
+                        ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            profileNotifier.profileList[0].address,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  profileNotifier.profileList[0].phone.isNotEmpty
+                      ? Column(
+                          children: [
+                            SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () => _makePhoneCall(
+                                  'tel:${profileNotifier.profileList[0].phone}'),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    Icons.phone,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      profileNotifier.profileList[0].phone,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w300,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : SizedBox(),
+                  SizedBox(height: 20),
+                  _time(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget _frontSide() {
+      return Stack(
+        children: [
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedContainer(
+              width: double.infinity,
+              height:
+                  _isClicked ? MediaQuery.of(context).size.height * 0.80 : 0.0,
+              duration: Duration(seconds: 1),
+              curve: Curves.fastOutSlowIn,
+              decoration: BoxDecoration(
+                color: c_background,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30.0),
+                  topRight: Radius.circular(30.0),
+                ),
+              ),
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                left: 30.0,
+                                right: 30.0,
+                                top: 40.0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      'Меню',
+                                      style: TextStyle(
+                                        color: t_primary,
+                                        fontSize: 30.0,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 16),
+                                  _setLanguage(),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              height: 80,
+                              child: ListView.builder(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10),
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount:
+                                      categoriesNotifier.categoriesList.length,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: EdgeInsets.all(5.0),
+                                      child: _chip(index),
+                                    );
+                                  }),
+                            ),
+                            _setMenu(),
+                          ],
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20.0, left: 18.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  FloatingActionButton.extended(
+                    elevation: 2,
+                    focusElevation: 4,
+                    hoverElevation: 4,
+                    highlightElevation: 8,
+                    heroTag: 'menu',
+                    onPressed: () {
+                      setState(() {
+                        _isClicked = !_isClicked;
+                        _isClicked
+                            ? _animationController.forward()
+                            : _animationController.reverse();
+                      });
+                    },
+                    icon: AnimatedIcon(
+                      icon: AnimatedIcons.menu_close,
+                      color: Colors.white,
+                      progress: _animationController,
+                    ),
+                    label: Text(
+                      'Меню',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    backgroundColor: c_secondary.withOpacity(0.5),
+                  ),
+                  RawMaterialButton(
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CartScreen(),
+                        ),
+                      );
+                      _isEmptyCart();
+                    },
+                    fillColor: c_secondary.withOpacity(.5),
+                    child: Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Icon(
+                          Icons.shopping_cart,
+                          color: Colors.white,
+                        ),
+                        _total != null
+                            ? Container(
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: Colors.deepOrange[900],
+                                  shape: BoxShape.circle,
+                                ),
+                              )
+                            : SizedBox(),
+                      ],
+                    ),
+                    padding: EdgeInsets.all(13.0),
+                    shape: CircleBorder(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
     }
 
     Widget _homeScreen() {
@@ -311,208 +722,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               backgroundColor: c_secondary,
               body: Stack(
                 children: <Widget>[
-                  Container(
-                    width: double.infinity,
-                    height: double.infinity,
-                    child: profileNotifier.profileList[0].image != null
-                        ? CachedNetworkImage(
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                            imageUrl: profileNotifier.profileList[0].image,
-                            placeholder: (context, url) => Align(
-                              alignment: Alignment.centerRight,
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 50.0),
-                                child:
-                                    CircularProgressIndicator(strokeWidth: 10),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Image.asset(
-                              'assets/placeholder_1024.png',
-                              width: double.infinity,
-                              height: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Image.asset('assets/placeholder_1024.png',
-                            fit: BoxFit.cover),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.55,
-                    height: double.infinity,
-                    color: c_primary,
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 50.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AutoSizeText(
-                            '${profileNotifier.profileList[0].title}'
-                                .toUpperCase(),
-                            maxLines: 3,
-                            textAlign: TextAlign.left,
-                            minFontSize: 25,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 50.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          profileNotifier.profileList[0].subTime != null
-                              ? _time()
-                              : Container(),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: AnimatedContainer(
-                      width: double.infinity,
-                      height: isClicked
-                          ? MediaQuery.of(context).size.height * 0.80
-                          : 0.0,
-                      duration: Duration(seconds: 1),
-                      curve: Curves.fastOutSlowIn,
-                      decoration: BoxDecoration(
-                        color: c_background,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(30.0),
-                          topRight: Radius.circular(30.0),
-                        ),
-                      ),
-                      child: CustomScrollView(
-                        slivers: <Widget>[
-                          SliverList(
-                            delegate: SliverChildListDelegate(
-                              <Widget>[
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Column(
-                                      children: <Widget>[
-                                        Align(
-                                          alignment: Alignment.topLeft,
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                              left: 30.0,
-                                              right: 30.0,
-                                              top: 40.0,
-                                            ),
-                                            child: Text(
-                                              'Меню',
-                                              style: TextStyle(
-                                                color: t_primary,
-                                                fontSize: 30.0,
-                                                fontWeight: FontWeight.w900,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      height: 80,
-                                      child: ListView.builder(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10),
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: categoriesNotifier
-                                              .categoriesList.length,
-                                          itemBuilder: (context, index) {
-                                            return Padding(
-                                              padding: EdgeInsets.all(5.0),
-                                              child: _chip(index),
-                                            );
-                                          }),
-                                    ),
-                                    _setMenu(),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 20.0, left: 18.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          FloatingActionButton.extended(
-                            elevation: 2,
-                            focusElevation: 4,
-                            hoverElevation: 4,
-                            highlightElevation: 8,
-                            heroTag: 'menu',
-                            onPressed: () {
-                              setState(() {
-                                isClicked = !isClicked;
-                                isClicked
-                                    ? _animationController.forward()
-                                    : _animationController.reverse();
-                              });
-                            },
-                            icon: AnimatedIcon(
-                              icon: AnimatedIcons.menu_close,
-                              color: Colors.white,
-                              progress: _animationController,
-                            ),
-                            label: Text(
-                              'Меню',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            backgroundColor: c_secondary.withOpacity(0.5),
-                          ),
-                          RawMaterialButton(
-                            onPressed: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CartScreen(),
-                                ),
-                              );
-                              _isEmptyCart();
-                            },
-                            fillColor: c_secondary.withOpacity(.5),
-                            child: Stack(
-                              alignment: Alignment.topRight,
-                              children: [
-                                Icon(
-                                  Icons.shopping_cart,
-                                  color: Colors.white,
-                                ),
-                                _total != null
-                                    ? Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          color: Colors.deepOrange[900],
-                                          shape: BoxShape.circle,
-                                        ),
-                                      )
-                                    : SizedBox(),
-                              ],
-                            ),
-                            padding: EdgeInsets.all(13.0),
-                            shape: CircleBorder(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  _backSide(),
+                  _frontSide(),
                 ],
               ),
             )

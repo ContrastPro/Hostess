@@ -2,12 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hostess/models/categories.dart';
 import 'package:hostess/notifier/categories_notifier.dart';
 
-getCategories(CategoriesNotifier categoriesNotifier, String restaurant,
-    String address) async {
+getCategories(CategoriesNotifier categoriesNotifier, String uid, String address,
+    String language) async {
   QuerySnapshot snapshot = await FirebaseFirestore.instance
-      .collection(restaurant)
+      .collection(uid)
       .doc(address)
-      .collection('ru')
+      .collection(language)
       .doc('Categories')
       .collection('Menu')
       .orderBy('createdAt', descending: false)

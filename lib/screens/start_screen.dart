@@ -41,10 +41,10 @@ class _StartScreenState extends State<StartScreen> {
       );
     }
 
-     Future<void> _testScanQR() async {
+    Future<void> _testScanQR() async {
       var barcodeScanRes;
       if (_scan == false) {
-        barcodeScanRes = 'kcPUo1hVcOShQQychzNdyw7Du9h1//4fibItto27xzlJb5elJm';
+        barcodeScanRes = 'zY31D7xo2pQWXjAkQz2L6NOnIkR2#iOACZRNjMVD6ISDm6zjd';
       } else {
         try {
           barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -59,15 +59,15 @@ class _StartScreenState extends State<StartScreen> {
         if (!mounted) return;
       }
 
-      if (barcodeScanRes.contains('//')) {
-        List<String> splitRes = barcodeScanRes.split('//');
+      if (barcodeScanRes.contains('#')) {
+        List<String> splitRes = barcodeScanRes.split('#');
         String _restaurant = splitRes[0];
         String _address = splitRes[1];
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                HomeScreen(restaurant: _restaurant, address: _address),
+                HomeScreen(uid: _restaurant, address: _address),
           ),
         );
       } else {
@@ -130,15 +130,15 @@ class _StartScreenState extends State<StartScreen> {
       }
       if (!mounted) return;
 
-      if (barcodeScanRes.contains('//')) {
-        List<String> splitRes = barcodeScanRes.split('//');
+      if (barcodeScanRes.contains('#')) {
+        List<String> splitRes = barcodeScanRes.split('#');
         String _restaurant = splitRes[0];
         String _address = splitRes[1];
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                HomeScreen(restaurant: _restaurant, address: _address),
+                HomeScreen(uid: _restaurant, address: _address),
           ),
         );
       } else {
@@ -193,8 +193,8 @@ class _StartScreenState extends State<StartScreen> {
                     focusElevation: 4,
                     hoverElevation: 4,
                     highlightElevation: 8,
-                    onPressed: () => _scanQR(),
-                    /*onPressed: () => _testDialog(context),*/
+                    /*onPressed: () => _scanQR(),*/
+                    onPressed: () => _testDialog(context),
                     icon: Icon(
                       Icons.camera_enhance,
                       color: t_primary,
