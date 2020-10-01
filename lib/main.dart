@@ -49,7 +49,7 @@ class _CheckConnectionState extends State<CheckConnection> {
       builder: (context, snapshot) {
         // Check for errors
         if (snapshot.hasError) {
-          return Center(child: Text(snapshot.error.toString()));
+          return Scaffold(body: Center(child: Text(snapshot.error.toString())));
         }
 
         // Once complete, show your application

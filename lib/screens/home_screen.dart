@@ -42,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isClickedLang = false;
   String _language;
   AnimationController _animationController;
+  final ScrollController _homeController = ScrollController();
 
   @override
   void initState() {
@@ -393,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   width: _size(),
                   height: 36,
                   decoration: BoxDecoration(
-                    color: c_secondary.withOpacity(0.6),
+                    color: c_secondary.withOpacity(0.5),
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(30.0),
                       bottomRight: Radius.circular(30.0),
@@ -425,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               width: 28,
                               height: 28,
                               child: Image.asset(
-                                  'assets/${profileNotifier.profileList[0].subLanguages[index]}.png'),
+                                  'assets/languages/${profileNotifier.profileList[0].subLanguages[index]}.png'),
                             ),
                           ),
                         );
@@ -439,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     child: Container(
                       width: 36,
                       height: 36,
-                      child: Image.asset('assets/$_language.png'),
+                      child: Image.asset('assets/languages/$_language.png'),
                     ),
                   ),
                 ),
@@ -572,8 +573,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             alignment: Alignment.bottomCenter,
             child: AnimatedContainer(
               width: double.infinity,
-              height:
-                  _isClicked ? MediaQuery.of(context).size.height * 0.80 : 0.0,
+              height: _isClicked
+                  ? MediaQuery.of(context).size.height * 0.80
+                  : 100.0,
               duration: Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
               decoration: BoxDecoration(
@@ -584,6 +586,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               child: CustomScrollView(
+                physics: _isClicked ? null : NeverScrollableScrollPhysics(),
+                controller: _homeController,
                 slivers: <Widget>[
                   SliverList(
                     delegate: SliverChildListDelegate(
@@ -593,16 +597,43 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           children: <Widget>[
                             Padding(
                               padding: const EdgeInsets.only(
-                                left: 30.0,
-                                right: 30.0,
+                                left: 25.0,
+                                right: 25.0,
                                 top: 40.0,
                               ),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Expanded(
-                                    child: Text(
+                                  FloatingActionButton.extended(
+                                    elevation: 0,
+                                    focusElevation: 0,
+                                    hoverElevation: 0,
+                                    highlightElevation: 0,
+                                    heroTag: 'menu',
+                                    onPressed: () {
+                                      setState(() {
+                                        _isClicked = !_isClicked;
+                                        _isClicked
+                                            ? _animationController.forward()
+                                            : _animationController.reverse();
+                                      });
+                                      if (_isClicked == false) {
+                                        _homeController.animateTo(
+                                          0.0,
+                                          curve: Curves.easeOut,
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                        );
+                                      }
+                                    },
+                                    icon: AnimatedIcon(
+                                      icon: AnimatedIcons.menu_close,
+                                      color: t_primary,
+                                      progress: _animationController,
+                                      size: 30,
+                                    ),
+                                    label: Text(
                                       'Меню',
                                       style: TextStyle(
                                         color: t_primary,
@@ -610,6 +641,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         fontWeight: FontWeight.w900,
                                       ),
                                     ),
+                                    backgroundColor: c_background,
                                   ),
                                   SizedBox(width: 16),
                                   _setLanguage(),
@@ -643,39 +675,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.only(top: 20.0, left: 18.0),
+              padding: const EdgeInsets.only(top: 20.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  FloatingActionButton.extended(
-                    elevation: 2,
-                    focusElevation: 4,
-                    hoverElevation: 4,
-                    highlightElevation: 8,
-                    heroTag: 'menu',
-                    onPressed: () {
-                      setState(() {
-                        _isClicked = !_isClicked;
-                        _isClicked
-                            ? _animationController.forward()
-                            : _animationController.reverse();
-                      });
-                    },
-                    icon: AnimatedIcon(
-                      icon: AnimatedIcons.menu_close,
+                  RawMaterialButton(
+                    onPressed: () => Navigator.pop(context),
+                    fillColor: c_secondary.withOpacity(0.5),
+                    child: Icon(
+                      Icons.arrow_back,
                       color: Colors.white,
-                      progress: _animationController,
                     ),
-                    label: Text(
-                      'Меню',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    backgroundColor: c_secondary.withOpacity(0.5),
+                    padding: EdgeInsets.all(13.0),
+                    shape: CircleBorder(),
                   ),
                   RawMaterialButton(
                     onPressed: () async {
@@ -719,18 +732,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     Widget _homeScreen() {
-      return profileNotifier.profileList.isNotEmpty
-          ? Scaffold(
-              backgroundColor: c_secondary,
-              body: Stack(
+      return Scaffold(
+        backgroundColor: c_secondary,
+        body: profileNotifier.profileList.isNotEmpty
+            ? Stack(
                 children: <Widget>[
                   _backSide(),
                   _frontSide(),
                 ],
-              ),
-            )
-          : Scaffold(
-              body: Center(child: CircularProgressIndicator(strokeWidth: 6)));
+              )
+            : Center(child: CircularProgressIndicator(strokeWidth: 6)),
+      );
     }
 
     Widget _setWidget() {

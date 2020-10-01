@@ -1,9 +1,10 @@
-import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:hostess/global/colors.dart';
+import 'package:hostess/global/fade_route.dart';
 import 'package:hostess/screens/home_screen.dart';
 
 class StartScreen extends StatefulWidget {
@@ -12,10 +13,11 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  bool _scan = false;
   bool _isClicked = false;
   double myOpacity = 0;
   String _searchQuery = "";
+  String _animationQr = "show";
+  String _animationSearch = "open";
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -24,109 +26,6 @@ class _StartScreenState extends State<StartScreen> {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.transparent));
-  }
-
-  _scanQR() async {
-    var barcodeScanRes;
-    try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        "#ff6666",
-        "Отмена",
-        true,
-        ScanMode.QR,
-      );
-    } on PlatformException {
-      barcodeScanRes = 'Failed to get platform version.';
-    }
-    if (!mounted) return;
-
-    if (barcodeScanRes.contains('#')) {
-      List<String> splitRes = barcodeScanRes.split('#');
-      String _restaurant = splitRes[0];
-      String _address = splitRes[1];
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(uid: _restaurant, address: _address),
-        ),
-      );
-    } else {
-      _showAlertDialog(context);
-    }
-  }
-
-  _testScanQR() async {
-    var barcodeScanRes;
-    if (_scan == false) {
-      barcodeScanRes = 'zY31D7xo2pQWXjAkQz2L6NOnIkR2#iOACZRNjMVD6ISDm6zjd';
-    } else {
-      try {
-        barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          "#ff6666",
-          "Отмена",
-          true,
-          ScanMode.QR,
-        );
-      } on PlatformException {
-        barcodeScanRes = 'Failed to get platform version.';
-      }
-      if (!mounted) return;
-    }
-
-    if (barcodeScanRes.contains('#')) {
-      List<String> splitRes = barcodeScanRes.split('#');
-      String _restaurant = splitRes[0];
-      String _address = splitRes[1];
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(uid: _restaurant, address: _address),
-        ),
-      );
-    } else {
-      _showAlertDialog(context);
-    }
-  }
-
-  _testDialog(BuildContext context) {
-    Widget cancelButton = FlatButton(
-      child: Text("Тестовые"),
-      onPressed: () {
-        setState(() {
-          _scan = false;
-        });
-        Navigator.of(context).pop();
-        _testScanQR();
-      },
-    );
-    Widget continueButton = FlatButton(
-      child: Text("Сканировать"),
-      onPressed: () {
-        setState(() {
-          _scan = true;
-        });
-        Navigator.of(context).pop();
-        _testScanQR();
-      },
-    );
-
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text("Для разработчиков"),
-      content: Text("Выберите действие"),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-
-    // show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
   }
 
   _showAlertDialog(BuildContext context) {
@@ -147,6 +46,33 @@ class _StartScreenState extends State<StartScreen> {
     );
   }
 
+  _scanQR() async {
+    var barcodeScanRes;
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        "#ff6666",
+        "Отмена",
+        true,
+        ScanMode.QR,
+      );
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+    if (!mounted) return;
+
+    if (barcodeScanRes.contains('#')) {
+      List<String> splitRes = barcodeScanRes.split('#');
+      Navigator.push(
+        context,
+        FadeRoute(
+          page: HomeScreen(uid: splitRes[0], address: splitRes[1]),
+        ),
+      );
+    } else {
+      _showAlertDialog(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget _buildSearchField() {
@@ -164,6 +90,7 @@ class _StartScreenState extends State<StartScreen> {
         ),
         child: TextFormField(
           decoration: InputDecoration(
+            suffix: SizedBox(width: 50),
             focusedBorder: border,
             border: border,
             prefixIcon: Icon(
@@ -174,55 +101,61 @@ class _StartScreenState extends State<StartScreen> {
             hintText: 'Название заведения',
             hintStyle: TextStyle(color: Colors.black.withOpacity(0.6)),
             fillColor: Colors.white.withOpacity(0.8),
-            /*helperText: 'Например: ',
-            helperStyle: TextStyle(color: Colors.white.withOpacity(0.8)),*/
           ),
+          readOnly: _isClicked ? false : true,
           controller: _searchController,
           onChanged: (String value) {
-            setState(() => _searchQuery = value);
+            setState(() => _searchQuery = value.toLowerCase());
           },
         ),
       );
     }
 
     Widget _setScanSearch() {
-      return AnimatedContainer(
-        height: _isClicked ? MediaQuery.of(context).size.height * 0.25 : 100.0,
-        duration: Duration(seconds: 1),
-        curve: Curves.fastOutSlowIn,
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            AnimatedContainer(
-              width: _isClicked ? MediaQuery.of(context).size.width : 60.0,
-              duration: Duration(seconds: 1),
-              curve: Curves.fastOutSlowIn,
-              child: _buildSearchField(),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() => _isClicked = !_isClicked);
-                  if (_isClicked == false) {
-                    setState(() {
-                      myOpacity = 0.0;
-                      _searchQuery = "";
-                    });
-                    _searchController.clear();
-                  } else {
-                    setState(() => myOpacity = 1.0);
-                  }
-                },
-                child: Container(
-                  width: 60,
-                  height: 60,
-                  child: Image.asset('assets/en.png'),
+      return SafeArea(
+        child: AnimatedContainer(
+          height: _isClicked ? MediaQuery.of(context).size.height * 0.25 : 80.0,
+          duration: const Duration(seconds: 1),
+          curve: Curves.fastOutSlowIn,
+          padding: const EdgeInsets.only(top: 20.0, left: 6, right: 6),
+          child: Stack(
+            alignment: Alignment.bottomRight,
+            children: [
+              AnimatedContainer(
+                width: _isClicked ? MediaQuery.of(context).size.width : 60.0,
+                duration: const Duration(seconds: 1),
+                curve: Curves.fastOutSlowIn,
+                child: _buildSearchField(),
+                margin: EdgeInsets.symmetric(horizontal: 14),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: RawMaterialButton(
+                  onPressed: () {
+                    setState(() => _isClicked = !_isClicked);
+                    if (_isClicked == false) {
+                      setState(() {
+                        myOpacity = 0;
+                        _searchQuery = "";
+                        _animationQr = "scanning";
+                      });
+                      _searchController.clear();
+                    } else {
+                      setState(() => myOpacity = 1);
+                    }
+                  },
+                  elevation: 2.0,
+                  fillColor: Colors.white,
+                  child: Icon(
+                    _isClicked ? Icons.clear : Icons.search,
+                    size: 30.0,
+                  ),
+                  padding: EdgeInsets.all(15.0),
+                  shape: CircleBorder(),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }
@@ -230,11 +163,16 @@ class _StartScreenState extends State<StartScreen> {
     Widget _setScan() {
       return Column(
         children: [
-          SizedBox(height: 100),
-          CircleAvatar(
-            radius: 80,
-            backgroundColor: c_background,
-            backgroundImage: AssetImage('assets/qrcode.png'),
+          SizedBox(height: 60),
+          Container(
+            width: 180,
+            height: 180,
+            child: FlareActor(
+              "assets/rive/qrcode.flr",
+              alignment: Alignment.center,
+              fit: BoxFit.contain,
+              animation: _animationQr,
+            ),
           ),
           SizedBox(height: 50.0),
           Padding(
@@ -262,30 +200,6 @@ class _StartScreenState extends State<StartScreen> {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 80.0, 20.0, 0.0),
-            child: FloatingActionButton.extended(
-              elevation: 2,
-              focusElevation: 4,
-              hoverElevation: 4,
-              highlightElevation: 8,
-              /*onPressed: () => _scanQR(),*/
-              onPressed: () => _testDialog(context),
-              icon: Icon(
-                Icons.camera_enhance,
-                color: t_primary,
-              ),
-              label: Text(
-                'Сканировать',
-                style: TextStyle(
-                  color: t_primary,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              backgroundColor: c_background,
-            ),
-          ),
         ],
       );
     }
@@ -297,22 +211,32 @@ class _StartScreenState extends State<StartScreen> {
             .where('subSearchKey', arrayContains: _searchQuery)
             .snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+          if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 
-          if (snapshot.hasData) {
-            return ListView.builder(
-              padding: EdgeInsets.all(30),
-              itemCount: snapshot.data.docs.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data.docs[index].data()['title']),
-                  subtitle: Text(snapshot.data.docs[index].data()['address']),
-                );
-              },
-            );
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator(strokeWidth: 6));
           }
 
-          return Center(child: CircularProgressIndicator(strokeWidth: 6));
+          return ListView.builder(
+            padding: EdgeInsets.all(30),
+            itemCount: snapshot.data.docs.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(snapshot.data.docs[index].data()['title']),
+                subtitle: Text(snapshot.data.docs[index].data()['address']),
+                onTap: () {
+                  List<String> splitRes =
+                      snapshot.data.docs[index].data()['id'].split('#');
+                  Navigator.push(
+                    context,
+                    FadeRoute(
+                      page: HomeScreen(uid: splitRes[0], address: splitRes[1]),
+                    ),
+                  );
+                },
+              );
+            },
+          );
         },
       );
     }
@@ -322,7 +246,17 @@ class _StartScreenState extends State<StartScreen> {
           ? _searchList()
           : Column(
               children: [
-                SizedBox(height: 100),
+                SizedBox(height: 30),
+                Container(
+                  width: 200,
+                  height: 200,
+                  child: FlareActor(
+                    "assets/rive/search_button.flr",
+                    alignment: Alignment.center,
+                    fit: BoxFit.contain,
+                    animation: _animationSearch,
+                  ),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Text(
@@ -354,6 +288,7 @@ class _StartScreenState extends State<StartScreen> {
 
     return Scaffold(
       backgroundColor: c_primary,
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           AnimatedOpacity(
@@ -365,7 +300,7 @@ class _StartScreenState extends State<StartScreen> {
                 ),
                 Container(
                   width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.35,
+                  height: MediaQuery.of(context).size.height * 0.40,
                   alignment: Alignment.topCenter,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -382,35 +317,50 @@ class _StartScreenState extends State<StartScreen> {
               ],
             ),
             opacity: myOpacity,
-            duration: Duration(seconds: 1),
+            duration: const Duration(seconds: 1),
           ),
           _setScanSearch(),
           AnimatedContainer(
-              margin: EdgeInsets.only(
-                  top: _isClicked
-                      ? MediaQuery.of(context).size.height * 0.30
-                      : MediaQuery.of(context).size.height * 0.15),
-              constraints: BoxConstraints.expand(
-                height: double.infinity,
+            margin: EdgeInsets.only(
+                top: _isClicked
+                    ? MediaQuery.of(context).size.height * 0.35
+                    : MediaQuery.of(context).size.height * 0.20),
+            constraints: BoxConstraints.expand(
+              height: double.infinity,
+            ),
+            duration: const Duration(seconds: 1),
+            curve: Curves.fastOutSlowIn,
+            decoration: BoxDecoration(
+              color: c_background,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30.0),
+                topRight: Radius.circular(30.0),
               ),
-              duration: Duration(seconds: 1),
-              curve: Curves.fastOutSlowIn,
-              decoration: BoxDecoration(
-                color: c_background,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
-                  topRight: Radius.circular(30.0),
-                ),
-              ),
-              child: AnimatedCrossFade(
-                duration: const Duration(seconds: 1),
-                firstChild: _setSearch(),
-                secondChild: _setScan(),
-                crossFadeState: _isClicked
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-              )),
+            ),
+            child: AnimatedCrossFade(
+              duration: const Duration(seconds: 1),
+              firstChild: _setSearch(),
+              secondChild: _setScan(),
+              crossFadeState: _isClicked
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+            ),
+          ),
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Visibility(
+        visible: _isClicked ? false : true,
+        child: FloatingActionButton.extended(
+          backgroundColor: c_secondary,
+          onPressed: () => _scanQR(),
+          icon: Icon(Icons.camera_enhance),
+          label: Text(
+            'СКАНИРОВАТЬ',
+            style: TextStyle(color: Colors.white),
+          ),
+          foregroundColor: Colors.white,
+        ),
       ),
     );
   }
