@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:hostess/database/db_cart.dart';
 import 'package:hostess/global/colors.dart';
+import 'package:hostess/global/fade_route.dart';
 import 'package:hostess/models/cart.dart';
 import 'package:hostess/screens/cart_screen.dart';
 
@@ -124,8 +125,7 @@ class _FoodDetailState extends State<FoodDetail> {
                         progressIndicatorBuilder:
                             (context, url, downloadProgress) => Center(
                           child: CircularProgressIndicator(
-                              value: downloadProgress.progress,
-                              strokeWidth: 10),
+                              value: downloadProgress.progress, strokeWidth: 6),
                         ),
                         errorWidget: (context, url, error) => Image.asset(
                           'assets/placeholder_1024.png',
@@ -394,8 +394,8 @@ class _FoodDetailState extends State<FoodDetail> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => CartScreen(),
+                            FadeRoute(
+                              page: CartScreen(),
                             ),
                           );
                         },
@@ -416,7 +416,7 @@ class _FoodDetailState extends State<FoodDetail> {
         }
 
         return Scaffold(
-            body: Center(child: CircularProgressIndicator(strokeWidth: 10)));
+            body: Center(child: CircularProgressIndicator(strokeWidth: 6)));
       },
     );
   }

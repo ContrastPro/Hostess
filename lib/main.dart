@@ -59,7 +59,7 @@ class _CheckConnectionState extends State<CheckConnection> {
 
         // Otherwise, show something whilst waiting for initialization to complete
         return Scaffold(
-            body: Center(child: CircularProgressIndicator(strokeWidth: 10)));
+            body: Center(child: CircularProgressIndicator(strokeWidth: 6)));
       },
     );
   }

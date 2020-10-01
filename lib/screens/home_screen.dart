@@ -8,6 +8,7 @@ import 'package:hostess/api/profile_api.dart';
 import 'package:hostess/database/db_cart.dart';
 
 import 'package:hostess/global/colors.dart';
+import 'package:hostess/global/fade_route.dart';
 
 import 'package:hostess/notifier/categories_notifier.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
@@ -74,12 +75,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     ProfileNotifier profileNotifier =
         Provider.of<ProfileNotifier>(context, listen: false);
     await getProfile(profileNotifier, uid, address);
+    setState(() => _language = profileNotifier.profileList[0].subLanguages[0]);
     CategoriesNotifier categoriesNotifier =
         Provider.of<CategoriesNotifier>(context, listen: false);
     getCategories(categoriesNotifier, uid, address,
         profileNotifier.profileList[0].subLanguages[0]);
-
-    setState(() => _language = profileNotifier.profileList[0].subLanguages[0]);
   }
 
   _isEmptyCart() async {
@@ -210,8 +210,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () async {
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => FoodDetail(
+                  FadeRoute(
+                    page: FoodDetail(
                       id: document.data()['id'],
                       uid: uid,
                       address: address,
@@ -311,7 +311,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     Widget _setMenu() {
-      return categoriesNotifier.categoriesList.isNotEmpty
+      return categoriesNotifier.categoriesList.isNotEmpty && _language != null
           ? StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection(uid)
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   return Padding(
                     padding: const EdgeInsets.only(top: 100.0),
                     child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 10)),
+                        child: CircularProgressIndicator(strokeWidth: 6)),
                   );
                 }
 
@@ -370,7 +370,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
                   child: Text(
-                    'Похоже меню на языке "${_language.toUpperCase()}" всё ещё в разработке. Выберите другой язык!',
+                    'Похоже меню на языке "$_language" всё ещё в разработке. Выберите другой язык!',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: t_primary.withOpacity(0.5),
@@ -384,64 +384,68 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
 
     Widget _setLanguage() {
-      return Stack(
-        children: [
-          AnimatedContainer(
-            duration: Duration(seconds: 1),
-            curve: Curves.fastOutSlowIn,
-            width: _size(),
-            height: 36,
-            decoration: BoxDecoration(
-              color: c_secondary.withOpacity(0.6),
-              borderRadius: BorderRadius.only(
-                topRight: Radius.circular(30.0),
-                bottomRight: Radius.circular(30.0),
-              ),
-            ),
-            margin: EdgeInsets.only(left: 18),
-            child: ListView.builder(
-                reverse: true,
-                scrollDirection: Axis.horizontal,
-                itemCount: profileNotifier.profileList[0].subLanguages.length,
-                padding: EdgeInsets.only(left: 25),
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5.0,
+      return _language != null
+          ? Stack(
+              children: [
+                AnimatedContainer(
+                  duration: Duration(seconds: 1),
+                  curve: Curves.fastOutSlowIn,
+                  width: _size(),
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: c_secondary.withOpacity(0.6),
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(30.0),
+                      bottomRight: Radius.circular(30.0),
                     ),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _language = profileNotifier
-                              .profileList[0].subLanguages[index];
-                          _isClickedLang = !_isClickedLang;
-                        });
-                        getCategories(
-                            categoriesNotifier, uid, address, _language);
-                      },
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        child: Image.asset(
-                            'assets/${profileNotifier.profileList[0].subLanguages[index]}.png'),
-                      ),
+                  ),
+                  margin: EdgeInsets.only(left: 18),
+                  child: ListView.builder(
+                      reverse: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount:
+                          profileNotifier.profileList[0].subLanguages.length,
+                      padding: EdgeInsets.only(left: 25),
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5.0,
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _language = profileNotifier
+                                    .profileList[0].subLanguages[index];
+                                _isClickedLang = !_isClickedLang;
+                              });
+                              getCategories(
+                                  categoriesNotifier, uid, address, _language);
+                            },
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              child: Image.asset(
+                                  'assets/${profileNotifier.profileList[0].subLanguages[index]}.png'),
+                            ),
+                          ),
+                        );
+                      }),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: () =>
+                        setState(() => _isClickedLang = !_isClickedLang),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      child: Image.asset('assets/$_language.png'),
                     ),
-                  );
-                }),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () => setState(() => _isClickedLang = !_isClickedLang),
-              child: Container(
-                width: 36,
-                height: 36,
-                child: Image.asset('assets/$_language.png'),
-              ),
-            ),
-          ),
-        ],
-      );
+                  ),
+                ),
+              ],
+            )
+          : SizedBox();
     }
 
     Widget _backSide() {
@@ -460,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       alignment: Alignment.centerRight,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 50.0),
-                        child: CircularProgressIndicator(strokeWidth: 10),
+                        child: CircularProgressIndicator(strokeWidth: 6),
                       ),
                     ),
                     errorWidget: (context, url, error) => Image.asset(
@@ -489,7 +493,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     minFontSize: 25,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 50.0,
+                      fontSize: 45.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -497,10 +501,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   GestureDetector(
                     onTap: () => _launchMap(
                         profileNotifier.profileList[0].title +
-                            ",\t" +
+                            ", " +
                             profileNotifier.profileList[0].address),
-                    /*onTap: () => _launchMap(
-                                "Jardin" + ",\t" + "Одесса, ул. Гаванная 10"),*/
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -679,8 +681,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     onPressed: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => CartScreen(),
+                        FadeRoute(
+                          page: CartScreen(),
                         ),
                       );
                       _isEmptyCart();
@@ -728,7 +730,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             )
           : Scaffold(
-              body: Center(child: CircularProgressIndicator(strokeWidth: 10)));
+              body: Center(child: CircularProgressIndicator(strokeWidth: 6)));
     }
 
     Widget _setWidget() {
@@ -737,7 +739,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       } else if (_isExist == 1) {
         return Scaffold(
           body: Center(
-            child: CircularProgressIndicator(strokeWidth: 10),
+            child: CircularProgressIndicator(strokeWidth: 6),
           ),
         );
       } else {
