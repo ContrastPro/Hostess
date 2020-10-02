@@ -465,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       alignment: Alignment.centerRight,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 50.0),
-                        child: CircularProgressIndicator(strokeWidth: 6),
+                        child: CircularProgressIndicator(strokeWidth: 6, backgroundColor: c_background),
                       ),
                     ),
                     errorWidget: (context, url, error) => Image.asset(
@@ -631,13 +631,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       icon: AnimatedIcons.menu_close,
                                       color: t_primary,
                                       progress: _animationController,
-                                      size: 30,
+                                      size: 23,
                                     ),
                                     label: Text(
                                       'Меню',
                                       style: TextStyle(
                                         color: t_primary,
-                                        fontSize: 30.0,
+                                        fontSize: 25.0,
                                         fontWeight: FontWeight.w900,
                                       ),
                                     ),

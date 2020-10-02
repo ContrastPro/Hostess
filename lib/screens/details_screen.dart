@@ -25,7 +25,13 @@ class _FoodDetailState extends State<FoodDetail> {
       this.id, this.uid, this.address, this.language, this.categories);
 
   int _selectedIndex = 0;
+  int _total;
   String _price, _amount;
+
+  _isEmptyCart() async {
+    int total = await MastersDatabaseProvider.db.calculateTotal();
+    setState(() => _total = total);
+  }
 
   _addToCart(String image, String title, String price, String description,
       String amount) async {
@@ -85,6 +91,8 @@ class _FoodDetailState extends State<FoodDetail> {
               List<String> splitRes = data['subPrice'][0].split('#');
               _price = splitRes[1];
             }
+
+            _isEmptyCart();
             return Stack(
               children: <Widget>[
                 Container(
@@ -212,8 +220,8 @@ class _FoodDetailState extends State<FoodDetail> {
                                         FloatingActionButton(
                                           elevation: 0,
                                           highlightElevation: 0,
-                                          onPressed: () {
-                                            _addToCart(
+                                          onPressed: () async {
+                                            await _addToCart(
                                               data['imageLow'],
                                               data['title'],
                                               data['subPrice'][_selectedIndex],
@@ -221,6 +229,7 @@ class _FoodDetailState extends State<FoodDetail> {
                                               data['subPrice'][_selectedIndex],
                                             );
                                             _show(context);
+                                            _isEmptyCart();
                                           },
                                           child: Icon(Icons.add),
                                           backgroundColor: c_primary,
@@ -339,18 +348,34 @@ class _FoodDetailState extends State<FoodDetail> {
                           shape: CircleBorder(),
                         ),
                         RawMaterialButton(
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            await Navigator.push(
                               context,
                               FadeRoute(
                                 page: CartScreen(),
                               ),
                             );
+                            _isEmptyCart();
                           },
-                          fillColor: c_secondary.withOpacity(0.5),
-                          child: Icon(
-                            Icons.shopping_cart,
-                            color: Colors.white,
+                          fillColor: c_secondary.withOpacity(.5),
+                          child: Stack(
+                            alignment: Alignment.topRight,
+                            children: [
+                              Icon(
+                                Icons.shopping_cart,
+                                color: Colors.white,
+                              ),
+                              _total != null
+                                  ? Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: Colors.deepOrange[900],
+                                        shape: BoxShape.circle,
+                                      ),
+                                    )
+                                  : SizedBox(),
+                            ],
                           ),
                           padding: EdgeInsets.all(13.0),
                           shape: CircleBorder(),

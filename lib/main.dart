@@ -44,20 +44,16 @@ class _CheckConnectionState extends State<CheckConnection> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      // Initialize FlutterFire
       future: Firebase.initializeApp(),
       builder: (context, snapshot) {
-        // Check for errors
         if (snapshot.hasError) {
-          return Scaffold(body: Center(child: Text(snapshot.error.toString())));
+          return Scaffold(body: Center(child: Text("Error: ${snapshot.error}")));
         }
 
-        // Once complete, show your application
         if (snapshot.connectionState == ConnectionState.done) {
           return StartScreen();
         }
 
-        // Otherwise, show something whilst waiting for initialization to complete
         return Scaffold(
             body: Center(child: CircularProgressIndicator(strokeWidth: 6)));
       },

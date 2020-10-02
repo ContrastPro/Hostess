@@ -213,30 +213,30 @@ class _StartScreenState extends State<StartScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator(strokeWidth: 6));
+          if (snapshot.hasData) {
+            return ListView.builder(
+              padding: EdgeInsets.all(30),
+              itemCount: snapshot.data.docs.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(snapshot.data.docs[index].data()['title']),
+                  subtitle: Text(snapshot.data.docs[index].data()['address']),
+                  onTap: () {
+                    List<String> splitRes =
+                        snapshot.data.docs[index].data()['id'].split('#');
+                    Navigator.push(
+                      context,
+                      FadeRoute(
+                        page:
+                            HomeScreen(uid: splitRes[0], address: splitRes[1]),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
           }
-
-          return ListView.builder(
-            padding: EdgeInsets.all(30),
-            itemCount: snapshot.data.docs.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(snapshot.data.docs[index].data()['title']),
-                subtitle: Text(snapshot.data.docs[index].data()['address']),
-                onTap: () {
-                  List<String> splitRes =
-                      snapshot.data.docs[index].data()['id'].split('#');
-                  Navigator.push(
-                    context,
-                    FadeRoute(
-                      page: HomeScreen(uid: splitRes[0], address: splitRes[1]),
-                    ),
-                  );
-                },
-              );
-            },
-          );
+          return Center(child: CircularProgressIndicator(strokeWidth: 6));
         },
       );
     }
