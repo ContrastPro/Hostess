@@ -213,30 +213,35 @@ class _StartScreenState extends State<StartScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 
-          if (snapshot.hasData) {
-            return ListView.builder(
-              padding: EdgeInsets.all(30),
-              itemCount: snapshot.data.docs.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data.docs[index].data()['title']),
-                  subtitle: Text(snapshot.data.docs[index].data()['address']),
-                  onTap: () {
-                    List<String> splitRes =
-                        snapshot.data.docs[index].data()['id'].split('#');
-                    Navigator.push(
-                      context,
-                      FadeRoute(
-                        page:
-                            HomeScreen(uid: splitRes[0], address: splitRes[1]),
-                      ),
-                    );
-                  },
-                );
-              },
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Padding(
+              padding: const EdgeInsets.only(top: 50),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: CircularProgressIndicator(strokeWidth: 6),
+              ),
             );
           }
-          return Center(child: CircularProgressIndicator(strokeWidth: 6));
+          return ListView.builder(
+            padding: const EdgeInsets.all(30),
+            itemCount: snapshot.data.docs.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(snapshot.data.docs[index].data()['title']),
+                subtitle: Text(snapshot.data.docs[index].data()['address']),
+                onTap: () {
+                  List<String> splitRes =
+                      snapshot.data.docs[index].data()['id'].split('#');
+                  Navigator.push(
+                    context,
+                    FadeRoute(
+                      page: HomeScreen(uid: splitRes[0], address: splitRes[1]),
+                    ),
+                  );
+                },
+              );
+            },
+          );
         },
       );
     }

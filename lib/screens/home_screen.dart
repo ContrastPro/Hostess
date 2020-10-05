@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flare_flutter/flare_actor.dart';
 
 import 'package:flutter/material.dart';
 import 'package:hostess/api/categories_api.dart';
@@ -17,6 +18,8 @@ import 'package:hostess/screens/details_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../global/colors.dart';
 
 class HomeScreen extends StatefulWidget {
   final String uid;
@@ -39,7 +42,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   int _total;
   bool _isClicked = false;
-  bool _isClickedLang = false;
   String _language;
   AnimationController _animationController;
   final ScrollController _homeController = ScrollController();
@@ -88,28 +90,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     setState(() => _total = total);
   }
 
-  _onSelected(int index) {
-    setState(() => _selectedIndex = index);
-  }
-
-  _launchMap(String openMap) async {
-    String url =
-        'https://www.google.com/maps/search/${Uri.encodeFull(openMap)}';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
-  _makePhoneCall(String openPhone) async {
-    if (await canLaunch(openPhone)) {
-      await launch(openPhone);
-    } else {
-      throw 'Could not launch $openPhone';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     ProfileNotifier profileNotifier = Provider.of<ProfileNotifier>(context);
@@ -117,25 +97,89 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     CategoriesNotifier categoriesNotifier =
         Provider.of<CategoriesNotifier>(context);
 
-    double _size() {
-      if (_isClickedLang) {
-        switch (profileNotifier.profileList[0].subLanguages.length) {
-          case 1:
-            return 60.0;
+    _onSelected(int index) {
+      setState(() => _selectedIndex = index);
+    }
 
-            break;
-          case 2:
-            return 100.0;
-
-            break;
-          default:
-            return 140.0;
-
-            break;
-        }
+    _launchMap(String openMap) async {
+      String url =
+          'https://www.google.com/maps/search/${Uri.encodeFull(openMap)}';
+      if (await canLaunch(url)) {
+        await launch(url);
       } else {
-        return 18.0;
+        throw 'Could not launch $url';
       }
+    }
+
+    _makePhoneCall(String openPhone) async {
+      if (await canLaunch(openPhone)) {
+        await launch(openPhone);
+      } else {
+        throw 'Could not launch $openPhone';
+      }
+    }
+
+    String _titleLanguage(String subLanguages) {
+      switch (subLanguages) {
+        case "ru":
+          return "Русский";
+
+          break;
+
+        case "ua":
+          return "Українська";
+
+          break;
+
+        default:
+          return "English";
+
+          break;
+      }
+    }
+
+    _showLanguageDialog() {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return SimpleDialog(
+              title: Text('Доступные языки'),
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemCount:
+                      profileNotifier.profileList[0].subLanguages.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          onTap: () {
+                            setState(() {
+                              _language = profileNotifier
+                                  .profileList[0].subLanguages[index];
+                            });
+                            getCategories(
+                                categoriesNotifier, uid, address, _language);
+                            Navigator.pop(context);
+                          },
+                          leading: Container(
+                            width: 30,
+                            height: 30,
+                            child: Image.asset(
+                                'assets/languages/${profileNotifier.profileList[0].subLanguages[index]}.png'),
+                          ),
+                          title: Text(
+                            _titleLanguage(profileNotifier
+                                .profileList[0].subLanguages[index]),
+                          ),
+                        );
+                      }),
+                ),
+              ],
+            );
+          });
     }
 
     Widget _time() {
@@ -243,7 +287,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   (context, url, downloadProgress) => Padding(
                                 padding: const EdgeInsets.all(15.0),
                                 child: CircularProgressIndicator(
-                                    value: downloadProgress.progress),
+                                    value: downloadProgress.progress,
+                                    backgroundColor: c_background),
                               ),
                               errorWidget: (context, url, error) => Image.asset(
                                   'assets/placeholder_200.png',
@@ -328,27 +373,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   return Center(child: Text('Something went wrong'));
                 }
 
-                if (!snapshot.hasData) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 100.0),
-                    child: Center(
-                        child: CircularProgressIndicator(strokeWidth: 6)),
+                if (snapshot.hasData) {
+                  return ListView.builder(
+                    padding: EdgeInsets.only(
+                      left: 25.0,
+                      top: 0.0,
+                      right: 30.0,
+                      bottom: 20.0,
+                    ),
+                    itemCount: snapshot.data.documents.length,
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return _menuItem(index, snapshot.data.documents[index]);
+                    },
                   );
                 }
 
-                return ListView.builder(
-                  padding: EdgeInsets.only(
-                    left: 25.0,
-                    top: 0.0,
-                    right: 30.0,
-                    bottom: 20.0,
-                  ),
-                  itemCount: snapshot.data.documents.length,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return _menuItem(index, snapshot.data.documents[index]);
-                  },
+                return Padding(
+                  padding: const EdgeInsets.only(top: 100.0),
+                  child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 6)),
                 );
               },
             )
@@ -384,71 +429,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             );
     }
 
-    Widget _setLanguage() {
-      return _language != null
-          ? Stack(
-              children: [
-                AnimatedContainer(
-                  duration: Duration(seconds: 1),
-                  curve: Curves.fastOutSlowIn,
-                  width: _size(),
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: c_secondary.withOpacity(0.5),
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(30.0),
-                      bottomRight: Radius.circular(30.0),
-                    ),
-                  ),
-                  margin: EdgeInsets.only(left: 18),
-                  child: ListView.builder(
-                      reverse: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount:
-                          profileNotifier.profileList[0].subLanguages.length,
-                      padding: EdgeInsets.only(left: 25),
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 5.0,
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _language = profileNotifier
-                                    .profileList[0].subLanguages[index];
-                                _isClickedLang = !_isClickedLang;
-                              });
-                              getCategories(
-                                  categoriesNotifier, uid, address, _language);
-                            },
-                            child: Container(
-                              width: 28,
-                              height: 28,
-                              child: Image.asset(
-                                  'assets/languages/${profileNotifier.profileList[0].subLanguages[index]}.png'),
-                            ),
-                          ),
-                        );
-                      }),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: () =>
-                        setState(() => _isClickedLang = !_isClickedLang),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      child: Image.asset('assets/languages/$_language.png'),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : SizedBox();
-    }
-
     Widget _backSide() {
       return Stack(
         children: [
@@ -465,7 +445,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       alignment: Alignment.centerRight,
                       child: Padding(
                         padding: const EdgeInsets.only(right: 50.0),
-                        child: CircularProgressIndicator(strokeWidth: 6, backgroundColor: c_background),
+                        child: CircularProgressIndicator(
+                            strokeWidth: 6, backgroundColor: c_background),
                       ),
                     ),
                     errorWidget: (context, url, error) => Image.asset(
@@ -631,7 +612,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       icon: AnimatedIcons.menu_close,
                                       color: t_primary,
                                       progress: _animationController,
-                                      size: 23,
+                                      size: 25,
                                     ),
                                     label: Text(
                                       'Меню',
@@ -644,7 +625,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     backgroundColor: c_background,
                                   ),
                                   SizedBox(width: 16),
-                                  _setLanguage(),
+                                  _language != null
+                                      ? GestureDetector(
+                                          onTap: () => _showLanguageDialog(),
+                                          child: CircleAvatar(
+                                            maxRadius: 18,
+                                            minRadius: 18,
+                                            child: Text(
+                                              '$_language'.toUpperCase(),
+                                              style: TextStyle(
+                                                fontSize: 14.0,
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            backgroundColor:
+                                                Colors.deepOrange[900],
+                                          ),
+                                        )
+                                      : SizedBox(),
                                 ],
                               ),
                             ),
@@ -760,11 +759,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           body: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/empty_search.png',
-                fit: BoxFit.cover,
+              Container(
+                width: 250,
+                height: 250,
+                child: FlareActor(
+                  "assets/rive/empty.flr",
+                  alignment: Alignment.center,
+                  fit: BoxFit.contain,
+                  animation: "show",
+                ),
               ),
-              SizedBox(height: 40.0),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
@@ -781,7 +785,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
                 child: Text(
-                  'Похоже заведение которое вы ищите ещё не существует :(',
+                  'Похоже заведение которое вы ищите ещё не существует.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: t_primary.withOpacity(0.5),
