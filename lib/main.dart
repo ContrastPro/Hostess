@@ -47,7 +47,8 @@ class _CheckConnectionState extends State<CheckConnection> {
       future: Firebase.initializeApp(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return Scaffold(body: Center(child: Text("Error: ${snapshot.error}")));
+          return Scaffold(
+              body: Center(child: Text("Error: ${snapshot.error}")));
         }
 
         if (snapshot.connectionState == ConnectionState.done) {

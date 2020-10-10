@@ -27,7 +27,6 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     _showDetailDialog(String title, String description, String amount) {
       showDialog(
           context: context,
@@ -59,7 +58,8 @@ class _CartScreenState extends State<CartScreen> {
         children: <Widget>[
           FutureBuilder<List<Cart>>(
             future: MastersDatabaseProvider.db.getAllCart(),
-            builder: (BuildContext context, AsyncSnapshot<List<Cart>> snapshot) {
+            builder:
+                (BuildContext context, AsyncSnapshot<List<Cart>> snapshot) {
               if (snapshot.hasData) {
                 return ListView.builder(
                   padding: EdgeInsets.symmetric(vertical: 20.0),
@@ -93,15 +93,15 @@ class _CartScreenState extends State<CartScreen> {
                                 ),
                                 child: item.image != null
                                     ? CachedNetworkImage(
-                                  fit: BoxFit.cover,
-                                  imageUrl: item.image,
-                                  errorWidget: (context, url, error) =>
-                                      Image.asset(
-                                          'assets/placeholder_200.png',
-                                          fit: BoxFit.cover),
-                                )
+                                        fit: BoxFit.cover,
+                                        imageUrl: item.image,
+                                        errorWidget: (context, url, error) =>
+                                            Image.asset(
+                                                'assets/placeholder_200.png',
+                                                fit: BoxFit.cover),
+                                      )
                                     : Image.asset('assets/placeholder_200.png',
-                                    fit: BoxFit.cover),
+                                        fit: BoxFit.cover),
                               ),
                             ),
                             Expanded(
@@ -124,7 +124,8 @@ class _CartScreenState extends State<CartScreen> {
                                     ),
                                     SizedBox(height: 8),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: <Widget>[
                                         Text(
                                           '₴',
@@ -292,7 +293,7 @@ class _CartScreenState extends State<CartScreen> {
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.15,
               child: Padding(
-                padding: const EdgeInsets.only(left: 30.0),
+                padding: const EdgeInsets.only(left: 20.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,

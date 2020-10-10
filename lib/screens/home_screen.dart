@@ -19,8 +19,6 @@ import 'package:hostess/screens/details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../global/colors.dart';
-
 class HomeScreen extends StatefulWidget {
   final String uid;
   final String address;
@@ -40,17 +38,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   int _isExist = 1;
   int _selectedIndex = 0;
+  int _addressIndex = 0;
   int _total;
   bool _isClicked = false;
   String _language;
   AnimationController _animationController;
   final ScrollController _homeController = ScrollController();
+  PageController _pageController;
 
   @override
   void initState() {
     _preLoad();
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 1));
+    _pageController = PageController(
+        initialPage: _addressIndex, keepPage: true, viewportFraction: 0.35);
     super.initState();
   }
 
@@ -152,16 +154,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
                       itemCount:
-                      profileNotifier.profileList[0].subLanguages.length,
+                          profileNotifier.profileList[0].subLanguages.length,
                       itemBuilder: (context, index) {
                         return ListTile(
                           onTap: () {
-                            setState(() {
-                              _language = profileNotifier
-                                  .profileList[0].subLanguages[index];
-                            });
-                            getCategories(
-                                categoriesNotifier, uid, address, _language);
+                            if (_addressIndex != index) {
+                              setState(() {
+                                _addressIndex = index;
+                                _language = profileNotifier
+                                    .profileList[0].subLanguages[index];
+                                _selectedIndex = 0;
+                              });
+                              getCategories(
+                                  categoriesNotifier, uid, address, _language);
+                              _pageController.jumpToPage(index);
+                            }
                             Navigator.pop(context);
                           },
                           leading: Container(
@@ -392,8 +399,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                 return Padding(
                   padding: const EdgeInsets.only(top: 100.0),
-                  child: Center(
-                      child: CircularProgressIndicator(strokeWidth: 6)),
+                  child:
+                      Center(child: CircularProgressIndicator(strokeWidth: 6)),
                 );
               },
             )
@@ -547,6 +554,71 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       );
     }
 
+    Widget _langDots() {
+      return _language != null
+          ? GestureDetector(
+              onTap: () => _showLanguageDialog(),
+              child: SizedBox(
+                width: 80,
+                height: 30,
+                child: PageView.builder(
+                  itemCount: profileNotifier.profileList[0].subLanguages.length,
+                  controller: _pageController,
+                  onPageChanged: (int i) {
+                    setState(() {
+                      _addressIndex = i;
+                      _language =
+                          profileNotifier.profileList[0].subLanguages[i];
+                      _selectedIndex = 0;
+                    });
+                    getCategories(categoriesNotifier, uid, address, _language);
+                  },
+                  itemBuilder: (context, index) {
+                    return Transform.scale(
+                      scale: index == _addressIndex ? 1 : 0.8,
+                      child: Container(
+                        width: 35,
+                        height: 35,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: index == _addressIndex
+                              ? Colors.deepOrange[900]
+                              : c_secondary.withOpacity(0.5),
+                        ),
+                        child: Center(
+                          child: Text(
+                            profileNotifier.profileList[0].subLanguages[index]
+                                .toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            )
+          : SizedBox();
+    }
+
+    /*CircleAvatar(
+                    maxRadius: 18,
+                    minRadius: 18,
+                    child: Text(
+                      '$_language'.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 14.0,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    backgroundColor: Colors.deepOrange[900],
+                  ),*/
+
     Widget _frontSide() {
       return Stack(
         children: [
@@ -625,25 +697,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     backgroundColor: c_background,
                                   ),
                                   SizedBox(width: 16),
-                                  _language != null
-                                      ? GestureDetector(
-                                          onTap: () => _showLanguageDialog(),
-                                          child: CircleAvatar(
-                                            maxRadius: 18,
-                                            minRadius: 18,
-                                            child: Text(
-                                              '$_language'.toUpperCase(),
-                                              style: TextStyle(
-                                                fontSize: 14.0,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            backgroundColor:
-                                                Colors.deepOrange[900],
-                                          ),
-                                        )
-                                      : SizedBox(),
+                                  _langDots(),
                                 ],
                               ),
                             ),
@@ -651,7 +705,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               height: 80,
                               child: ListView.builder(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
+                                      horizontal: 24),
                                   scrollDirection: Axis.horizontal,
                                   itemCount:
                                       categoriesNotifier.categoriesList.length,
