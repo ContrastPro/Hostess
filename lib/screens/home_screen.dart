@@ -23,27 +23,21 @@ class HomeScreen extends StatefulWidget {
   final String uid;
   final String address;
 
-  HomeScreen({this.uid, this.address});
+  HomeScreen({Key key, @required this.uid, this.address}) : super(key: key);
 
   @override
-  _HomeScreenState createState() =>
-      _HomeScreenState(uid: uid, address: address);
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  final String uid;
-  final String address;
-
-  _HomeScreenState({this.uid, this.address});
-
   int _isExist = 1;
   int _selectedIndex = 0;
   int _addressIndex = 0;
   int _total;
   bool _isClicked = false;
   String _language;
-  AnimationController _animationController;
   final ScrollController _homeController = ScrollController();
+  AnimationController _animationController;
   PageController _pageController;
 
   @override
@@ -58,8 +52,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Future<void> _preLoad() async {
     await FirebaseFirestore.instance
-        .collection(uid)
-        .doc(address)
+        .collection(widget.uid)
+        .doc(widget.address)
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
@@ -79,11 +73,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   _load() async {
     ProfileNotifier profileNotifier =
         Provider.of<ProfileNotifier>(context, listen: false);
-    await getProfile(profileNotifier, uid, address);
+    await getProfile(profileNotifier, widget.uid, widget.address);
     setState(() => _language = profileNotifier.profileList[0].subLanguages[0]);
     CategoriesNotifier categoriesNotifier =
         Provider.of<CategoriesNotifier>(context, listen: false);
-    getCategories(categoriesNotifier, uid, address,
+    getCategories(categoriesNotifier, widget.uid, widget.address,
         profileNotifier.profileList[0].subLanguages[0]);
   }
 
@@ -165,8 +159,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                     .profileList[0].subLanguages[index];
                                 _selectedIndex = 0;
                               });
-                              getCategories(
-                                  categoriesNotifier, uid, address, _language);
+                              getCategories(categoriesNotifier, widget.uid,
+                                  widget.address, _language);
                               _pageController.jumpToPage(index);
                             }
                             Navigator.pop(context);
@@ -265,8 +259,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   FadeRoute(
                     page: FoodDetail(
                       id: document.data()['id'],
-                      uid: uid,
-                      address: address,
+                      uid: widget.uid,
+                      address: widget.address,
                       language: _language,
                       categories: categoriesNotifier
                           .categoriesList[_selectedIndex].title,
@@ -367,8 +361,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       return categoriesNotifier.categoriesList.isNotEmpty && _language != null
           ? StreamBuilder(
               stream: FirebaseFirestore.instance
-                  .collection(uid)
-                  .doc(address)
+                  .collection(widget.uid)
+                  .doc(widget.address)
                   .collection(_language)
                   .doc('Menu')
                   .collection(
@@ -458,8 +452,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     errorWidget: (context, url, error) => Image.asset(
                       'assets/placeholder_1024.png',
-                      width: double.infinity,
-                      height: double.infinity,
                       fit: BoxFit.cover,
                     ),
                   )
@@ -571,7 +563,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           profileNotifier.profileList[0].subLanguages[i];
                       _selectedIndex = 0;
                     });
-                    getCategories(categoriesNotifier, uid, address, _language);
+                    getCategories(categoriesNotifier, widget.uid,
+                        widget.address, _language);
                   },
                   itemBuilder: (context, index) {
                     return Transform.scale(
@@ -582,7 +575,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: index == _addressIndex
-                              ? Colors.deepOrange[900]
+                              ? c_accent
                               : c_secondary.withOpacity(0.5),
                         ),
                         child: Center(
@@ -604,20 +597,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             )
           : SizedBox();
     }
-
-    /*CircleAvatar(
-                    maxRadius: 18,
-                    minRadius: 18,
-                    child: Text(
-                      '$_language'.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    backgroundColor: Colors.deepOrange[900],
-                  ),*/
 
     Widget _frontSide() {
       return Stack(
@@ -766,7 +745,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 width: 6,
                                 height: 6,
                                 decoration: BoxDecoration(
-                                  color: Colors.deepOrange[900],
+                                  color: c_accent,
                                   shape: BoxShape.circle,
                                 ),
                               )

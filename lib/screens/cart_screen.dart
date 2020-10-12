@@ -16,8 +16,8 @@ class _CartScreenState extends State<CartScreen> {
 
   @override
   void initState() {
-    super.initState();
     _calculateTotal();
+    super.initState();
   }
 
   _calculateTotal() async {
@@ -345,7 +345,7 @@ class _CartScreenState extends State<CartScreen> {
                               MastersDatabaseProvider.db.deleteAllCart();
                               _calculateTotal();
                             },
-                            fillColor: Colors.red[700],
+                            fillColor: c_accent,
                             child: Icon(
                               Icons.delete_forever,
                               color: c_background,

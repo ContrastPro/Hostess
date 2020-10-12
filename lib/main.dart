@@ -28,19 +28,13 @@ class MyApp extends StatelessWidget {
       title: 'Hostess',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
-        brightness: Brightness.light,
       ),
       home: CheckConnection(),
     );
   }
 }
 
-class CheckConnection extends StatefulWidget {
-  @override
-  _CheckConnectionState createState() => _CheckConnectionState();
-}
-
-class _CheckConnectionState extends State<CheckConnection> {
+class CheckConnection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(

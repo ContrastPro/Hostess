@@ -11,19 +11,20 @@ import 'package:hostess/screens/cart_screen.dart';
 class FoodDetail extends StatefulWidget {
   final String id, uid, address, language, categories;
 
-  FoodDetail({this.id, this.uid, this.address, this.language, this.categories});
+  FoodDetail(
+      {Key key,
+      @required this.id,
+      this.uid,
+      this.address,
+      this.categories,
+      this.language})
+      : super(key: key);
 
   @override
-  _FoodDetailState createState() =>
-      _FoodDetailState(id, uid, address, language, categories);
+  _FoodDetailState createState() => _FoodDetailState();
 }
 
 class _FoodDetailState extends State<FoodDetail> {
-  final String id, uid, address, language, categories;
-
-  _FoodDetailState(
-      this.id, this.uid, this.address, this.language, this.categories);
-
   int _selectedIndex = 0;
   int _total;
   String _price, _amount;
@@ -70,15 +71,15 @@ class _FoodDetailState extends State<FoodDetail> {
   @override
   Widget build(BuildContext context) {
     CollectionReference detailDish = FirebaseFirestore.instance
-        .collection(uid)
-        .doc(address)
-        .collection(language)
+        .collection(widget.uid)
+        .doc(widget.address)
+        .collection(widget.language)
         .doc('Menu')
-        .collection(categories);
+        .collection(widget.categories);
 
     return Scaffold(
       body: FutureBuilder<DocumentSnapshot>(
-        future: detailDish.doc(id).get(),
+        future: detailDish.doc(widget.id).get(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text("Something went wrong"));
@@ -87,12 +88,13 @@ class _FoodDetailState extends State<FoodDetail> {
           if (snapshot.hasData) {
             Map<String, dynamic> data = snapshot.data.data();
 
+            _isEmptyCart();
+
             if (_selectedIndex == 0) {
               List<String> splitRes = data['subPrice'][0].split('#');
               _price = splitRes[1];
             }
 
-            _isEmptyCart();
             return Stack(
               children: <Widget>[
                 Container(
@@ -268,7 +270,7 @@ class _FoodDetailState extends State<FoodDetail> {
                                       ),
                                       backgroundColor: _selectedIndex != null &&
                                               _selectedIndex == index
-                                          ? Colors.deepOrange[900]
+                                          ? c_accent
                                           : Colors.white.withOpacity(0),
                                       elevation: 0.0,
                                       pressElevation: 0.0,
@@ -370,7 +372,7 @@ class _FoodDetailState extends State<FoodDetail> {
                                       width: 6,
                                       height: 6,
                                       decoration: BoxDecoration(
-                                        color: Colors.deepOrange[900],
+                                        color: c_accent,
                                         shape: BoxShape.circle,
                                       ),
                                     )

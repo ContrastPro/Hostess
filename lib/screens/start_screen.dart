@@ -85,7 +85,7 @@ class _StartScreenState extends State<StartScreen> {
 
       return Theme(
         data: Theme.of(context).copyWith(
-          cursorColor: Colors.redAccent,
+          cursorColor: c_accent,
           hintColor: Colors.transparent,
         ),
         child: TextFormField(
