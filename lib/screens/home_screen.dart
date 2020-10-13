@@ -258,12 +258,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   context,
                   FadeRoute(
                     page: FoodDetail(
-                      id: document.data()['id'],
-                      uid: widget.uid,
-                      address: widget.address,
-                      language: _language,
-                      categories: categoriesNotifier
-                          .categoriesList[_selectedIndex].title,
+                      imageHigh: document.data()['imageHigh'],
+                      imageLow: document.data()['imageLow'],
+                      title: document.data()['title'],
+                      description: document.data()['description'],
+                      subPrice: document.data()['subPrice'],
                     ),
                   ),
                 );
