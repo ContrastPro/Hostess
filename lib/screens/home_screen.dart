@@ -50,6 +50,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
   }
 
+  @override
+  dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
   Future<void> _preLoad() async {
     await FirebaseFirestore.instance
         .collection(widget.uid)
