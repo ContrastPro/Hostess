@@ -17,7 +17,8 @@ class _StartScreenState extends State<StartScreen> {
   double myOpacity = 0;
   String _searchQuery = "";
   String _animationQr = "show";
-  String _animationSearch = "open";
+
+  /*String _animationSearch = "open";*/
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -246,10 +247,54 @@ class _StartScreenState extends State<StartScreen> {
       );
     }
 
+    Widget _globalList() {
+      return _isClicked == true
+          ? StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Global_Search')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 50),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: CircularProgressIndicator(strokeWidth: 6),
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(30),
+                  itemCount: snapshot.data.docs.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(snapshot.data.docs[index].data()['title']),
+                      subtitle:
+                          Text(snapshot.data.docs[index].data()['address']),
+                      onTap: () {
+                        List<String> splitRes =
+                            snapshot.data.docs[index].data()['id'].split('#');
+                        Navigator.push(
+                          context,
+                          FadeRoute(
+                            page: HomeScreen(
+                                uid: splitRes[0], address: splitRes[1]),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            )
+          : SizedBox();
+    }
+
     Widget _setSearch() {
-      return _searchQuery.isNotEmpty
-          ? _searchList()
-          : Column(
+      return _searchQuery.isNotEmpty ? _searchList() : _globalList();
+      /*: Column(
               children: [
                 SizedBox(height: 30),
                 Container(
@@ -288,7 +333,7 @@ class _StartScreenState extends State<StartScreen> {
                   ),
                 ),
               ],
-            );
+            );*/
     }
 
     return Scaffold(
