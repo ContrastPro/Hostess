@@ -364,44 +364,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     Widget _setMenu() {
       return categoriesNotifier.categoriesList.isNotEmpty && _language != null
-          ? StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection(widget.uid)
-                  .doc(widget.address)
-                  .collection(_language)
-                  .doc('Menu')
-                  .collection(
-                      categoriesNotifier.categoriesList[_selectedIndex].title)
-                  .orderBy('createdAt', descending: false)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text('Something went wrong'));
-                }
+          ? Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 30),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                StreamBuilder(
+                  stream: FirebaseFirestore.instance
+                      .collection(widget.uid)
+                      .doc(widget.address)
+                      .collection(_language)
+                      .doc('Menu')
+                      .collection(categoriesNotifier
+                          .categoriesList[_selectedIndex].title)
+                      .orderBy('createdAt', descending: false)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Something went wrong'));
+                    }
 
-                if (snapshot.hasData) {
-                  return ListView.builder(
-                    padding: EdgeInsets.only(
-                      left: 25.0,
-                      top: 0.0,
-                      right: 30.0,
-                      bottom: 20.0,
-                    ),
-                    itemCount: snapshot.data.documents.length,
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return _menuItem(index, snapshot.data.documents[index]);
-                    },
-                  );
-                }
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                        padding: EdgeInsets.only(
+                          left: 25.0,
+                          top: 0.0,
+                          right: 30.0,
+                          bottom: 20.0,
+                        ),
+                        itemCount: snapshot.data.documents.length,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return _menuItem(
+                              index, snapshot.data.documents[index]);
+                        },
+                      );
+                    }
 
-                return Padding(
-                  padding: const EdgeInsets.only(top: 100.0),
-                  child:
-                      Center(child: CircularProgressIndicator(strokeWidth: 6)),
-                );
-              },
+                    return SizedBox();
+                  },
+                ),
+              ],
             )
           : Column(
               children: [
@@ -568,8 +573,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           profileNotifier.profileList[0].subLanguages[i];
                       _selectedIndex = 0;
                     });
-                    getCategories(categoriesNotifier, widget.uid,
-                        widget.address, _language);
+                    getCategories(
+                      categoriesNotifier,
+                      widget.uid,
+                      widget.address,
+                      profileNotifier.profileList[0].subLanguages[i],
+                    );
                   },
                   itemBuilder: (context, index) {
                     return Transform.scale(

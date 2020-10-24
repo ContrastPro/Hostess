@@ -215,31 +215,36 @@ class _StartScreenState extends State<StartScreen> {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 50),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: CircularProgressIndicator(strokeWidth: 6),
+            return Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 50),
+                child: CircularProgressIndicator(),
               ),
             );
           }
+
           return ListView.builder(
             padding: const EdgeInsets.all(30),
             itemCount: snapshot.data.docs.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(snapshot.data.docs[index].data()['title']),
-                subtitle: Text(snapshot.data.docs[index].data()['address']),
-                onTap: () {
-                  List<String> splitRes =
-                      snapshot.data.docs[index].data()['id'].split('#');
-                  Navigator.push(
-                    context,
-                    FadeRoute(
-                      page: HomeScreen(uid: splitRes[0], address: splitRes[1]),
-                    ),
-                  );
-                },
+              return Container(
+                color: c_background,
+                child: ListTile(
+                  title: Text(snapshot.data.docs[index].data()['title']),
+                  subtitle: Text(snapshot.data.docs[index].data()['address']),
+                  onTap: () {
+                    List<String> splitRes =
+                        snapshot.data.docs[index].data()['id'].split('#');
+                    Navigator.push(
+                      context,
+                      FadeRoute(
+                        page:
+                            HomeScreen(uid: splitRes[0], address: splitRes[1]),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           );
@@ -257,33 +262,31 @@ class _StartScreenState extends State<StartScreen> {
                 if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 50),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: CircularProgressIndicator(strokeWidth: 6),
-                    ),
-                  );
+                  return SizedBox();
                 }
+
                 return ListView.builder(
                   padding: const EdgeInsets.all(30),
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(snapshot.data.docs[index].data()['title']),
-                      subtitle:
-                          Text(snapshot.data.docs[index].data()['address']),
-                      onTap: () {
-                        List<String> splitRes =
-                            snapshot.data.docs[index].data()['id'].split('#');
-                        Navigator.push(
-                          context,
-                          FadeRoute(
-                            page: HomeScreen(
-                                uid: splitRes[0], address: splitRes[1]),
-                          ),
-                        );
-                      },
+                    return Container(
+                      color: c_background,
+                      child: ListTile(
+                        title: Text(snapshot.data.docs[index].data()['title']),
+                        subtitle:
+                            Text(snapshot.data.docs[index].data()['address']),
+                        onTap: () {
+                          List<String> splitRes =
+                              snapshot.data.docs[index].data()['id'].split('#');
+                          Navigator.push(
+                            context,
+                            FadeRoute(
+                              page: HomeScreen(
+                                  uid: splitRes[0], address: splitRes[1]),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -293,7 +296,22 @@ class _StartScreenState extends State<StartScreen> {
     }
 
     Widget _setSearch() {
-      return _searchQuery.isNotEmpty ? _searchList() : _globalList();
+      return Stack(
+        children: [
+          _isClicked == true
+              ? Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 50),
+                    child: _searchQuery.isNotEmpty
+                        ? SizedBox()
+                        : CircularProgressIndicator(),
+                  ),
+                )
+              : SizedBox(),
+          _searchQuery.isNotEmpty ? _searchList() : _globalList(),
+        ],
+      );
       /*: Column(
               children: [
                 SizedBox(height: 30),
