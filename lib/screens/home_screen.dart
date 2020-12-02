@@ -61,8 +61,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         .collection(widget.uid)
         .doc(widget.address)
         .get()
-        .then((DocumentSnapshot documentSnapshot) {
-      if (documentSnapshot.exists) {
+        .then((DocumentSnapshot document) {
+      if (document.exists) {
         setState(() {
           _isExist = 0;
         });
@@ -145,14 +145,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           context: context,
           builder: (context) {
             return SimpleDialog(
-              title: Text('Доступные языки'),
+              title: const Text('Доступные языки'),
               children: <Widget>[
                 Container(
                   width: MediaQuery.of(context).size.width * 0.9,
-                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: ListView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount:
                           profileNotifier.profileList[0].subLanguages.length,
                       itemBuilder: (context, index) {
@@ -251,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       );
     }
 
-    Widget _menuItem(int index, DocumentSnapshot document) {
+    Widget _menuItem(DocumentSnapshot document) {
       return Container(
         color: c_background,
         child: Padding(
@@ -262,15 +262,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onTap: () async {
                 await Navigator.push(
                   context,
-                  FadeRoute(
-                    page: FoodDetail(
-                      imageHigh: document.data()['imageHigh'],
-                      imageLow: document.data()['imageLow'],
-                      title: document.data()['title'],
-                      description: document.data()['description'],
-                      subPrice: document.data()['subPrice'],
-                    ),
-                  ),
+                  FadeRoute(page: FoodDetail(document: document)),
                 );
                 _isEmptyCart();
               },
@@ -290,15 +282,19 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               imageUrl: document.data()['imageLow'],
                               fit: BoxFit.cover,
                               progressIndicatorBuilder:
-                                  (context, url, downloadProgress) => Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: CircularProgressIndicator(
+                                  (context, url, downloadProgress) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: CircularProgressIndicator(
                                     value: downloadProgress.progress,
-                                    backgroundColor: c_background),
-                              ),
+                                    backgroundColor: c_background,
+                                  ),
+                                );
+                              },
                               errorWidget: (context, url, error) => Image.asset(
-                                  'assets/placeholder_200.png',
-                                  fit: BoxFit.cover),
+                                'assets/placeholder_200.png',
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : Image.asset('assets/placeholder_200.png',
                               fit: BoxFit.cover),
@@ -387,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                     if (snapshot.hasData) {
                       return ListView.builder(
-                        padding: EdgeInsets.only(
+                        padding: const EdgeInsets.only(
                           left: 25.0,
                           top: 0.0,
                           right: 30.0,
@@ -397,8 +393,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         shrinkWrap: true,
                         physics: NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
-                          return _menuItem(
-                              index, snapshot.data.documents[index]);
+                          return _menuItem(snapshot.data.documents[index]);
                         },
                       );
                     }
@@ -413,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 SizedBox(height: 40.0),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Text(
+                  child: const Text(
                     'Упс...',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -566,6 +561,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: PageView.builder(
                   itemCount: profileNotifier.profileList[0].subLanguages.length,
                   controller: _pageController,
+                  physics: BouncingScrollPhysics(),
                   onPageChanged: (int i) {
                     setState(() {
                       _addressIndex = i;
@@ -632,7 +628,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ),
               child: CustomScrollView(
-                physics: _isClicked ? null : NeverScrollableScrollPhysics(),
+                physics: _isClicked
+                    ? BouncingScrollPhysics()
+                    : NeverScrollableScrollPhysics(),
                 controller: _homeController,
                 slivers: <Widget>[
                   SliverList(
@@ -702,6 +700,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   scrollDirection: Axis.horizontal,
                                   itemCount:
                                       categoriesNotifier.categoriesList.length,
+                                  physics: BouncingScrollPhysics(),
                                   itemBuilder: (context, index) {
                                     return Padding(
                                       padding: EdgeInsets.all(5.0),

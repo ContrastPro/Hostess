@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:hostess/database/db_cart.dart';
@@ -8,17 +9,9 @@ import 'package:hostess/models/cart.dart';
 import 'package:hostess/screens/cart_screen.dart';
 
 class FoodDetail extends StatefulWidget {
-  final String imageHigh, imageLow, title, description;
-  final List subPrice;
+  final DocumentSnapshot document;
 
-  FoodDetail(
-      {Key key,
-      @required this.imageHigh,
-      this.imageLow,
-      this.title,
-      this.description,
-      this.subPrice})
-      : super(key: key);
+  FoodDetail({Key key, @required this.document}) : super(key: key);
 
   @override
   _FoodDetailState createState() => _FoodDetailState();
@@ -37,7 +30,7 @@ class _FoodDetailState extends State<FoodDetail> {
   }
 
   _preLoadPrice() {
-    List<String> splitRes = widget.subPrice[0].split('#');
+    List<String> splitRes = widget.document.data()['subPrice'][0].split('#');
     setState(() => _price = splitRes[1]);
   }
 
@@ -85,7 +78,8 @@ class _FoodDetailState extends State<FoodDetail> {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          widget.imageLow != null && widget.imageHigh != null
+          widget.document.data()['imageLow'] != null &&
+                  widget.document.data()['imageHigh'] != null
               ? Stack(
                   children: [
                     Container(
@@ -93,7 +87,7 @@ class _FoodDetailState extends State<FoodDetail> {
                       color: c_background,
                       height: MediaQuery.of(context).size.height * 0.80,
                       child: CachedNetworkImage(
-                        imageUrl: widget.imageLow,
+                        imageUrl: widget.document.data()['imageLow'],
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -101,7 +95,7 @@ class _FoodDetailState extends State<FoodDetail> {
                       width: double.infinity,
                       height: MediaQuery.of(context).size.height * 0.80,
                       child: CachedNetworkImage(
-                        imageUrl: widget.imageHigh,
+                        imageUrl: widget.document.data()['imageHigh'],
                         fit: BoxFit.cover,
                         progressIndicatorBuilder:
                             (context, url, downloadProgress) => Center(
@@ -148,175 +142,204 @@ class _FoodDetailState extends State<FoodDetail> {
                       topRight: Radius.circular(30.0),
                     ),
                   ),
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    padding: const EdgeInsets.symmetric(vertical: 30.0),
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
+                    children: [
+                      Align(
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 20.0),
+                          decoration: BoxDecoration(
+                            color: c_primary,
+                            borderRadius: BorderRadius.all(Radius.circular(90)),
+                          ),
+                          width: 40,
+                          height: 3,
+                        ),
+                        alignment: Alignment.topCenter,
+                      ),
+                      SingleChildScrollView(
+                        controller: scrollController,
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(vertical: 50.0),
+                        child: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 25.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
-                                  Text(
-                                    '₴',
-                                    style: TextStyle(
-                                      color: t_primary,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    '$_price',
-                                    style: TextStyle(
-                                      color: t_primary,
-                                      fontSize: 35.0,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Stack(
-                                alignment: Alignment.centerRight,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 26),
-                                    child: Container(
-                                      width: 100,
-                                      height: 37,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black12,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(20),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        '₴',
+                                        style: TextStyle(
+                                          color: t_primary,
+                                          fontSize: 20.0,
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                      child: Padding(
+                                      SizedBox(width: 5),
+                                      Text(
+                                        '$_price',
+                                        style: TextStyle(
+                                          color: t_primary,
+                                          fontSize: 35.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Stack(
+                                    alignment: Alignment.centerRight,
+                                    children: <Widget>[
+                                      Padding(
                                         padding:
-                                            const EdgeInsets.only(right: 5),
-                                        child: Center(
-                                          child: Text(
-                                            'ЗАКАЗ',
-                                            style: TextStyle(
-                                              color: t_primary,
-                                              fontSize: 13.0,
-                                              fontWeight: FontWeight.w500,
+                                            const EdgeInsets.only(right: 26),
+                                        child: Container(
+                                          width: 100,
+                                          height: 37,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black12,
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(20),
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(right: 5),
+                                            child: Center(
+                                              child: Text(
+                                                'ЗАКАЗ',
+                                                style: TextStyle(
+                                                  color: t_primary,
+                                                  fontSize: 13.0,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  FloatingActionButton(
-                                    elevation: 0,
-                                    highlightElevation: 0,
-                                    onPressed: () async {
-                                      await _addToCart(
-                                        widget.imageLow,
-                                        widget.title,
-                                        widget.subPrice[_selectedIndex],
-                                        widget.description,
-                                        widget.subPrice[_selectedIndex],
-                                      );
-                                      _show(context);
-                                      _isEmptyCart();
-                                    },
-                                    child: Icon(Icons.add),
-                                    backgroundColor: c_primary,
-                                    mini: true,
+                                      FloatingActionButton(
+                                        elevation: 0,
+                                        highlightElevation: 0,
+                                        onPressed: () async {
+                                          await _addToCart(
+                                            widget.document.data()['imageLow'],
+                                            widget.document.data()['title'],
+                                            widget.document.data()['subPrice']
+                                                [_selectedIndex],
+                                            widget.document
+                                                .data()['description'],
+                                            widget.document.data()['subPrice']
+                                                [_selectedIndex],
+                                          );
+                                          _show(context);
+                                          _isEmptyCart();
+                                        },
+                                        child: Icon(Icons.add),
+                                        backgroundColor: c_primary,
+                                        mini: true,
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Container(
-                          height: 80,
-                          child: ListView.builder(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 20.0),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: widget.subPrice.length,
-                            itemBuilder: (context, index) {
-                              List<String> splitRes =
-                                  widget.subPrice[index].split('#');
-                              _amount = splitRes[0];
-                              return FilterChip(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 8.0),
-                                label: Text(
-                                  '$_amount',
-                                  style: TextStyle(
-                                    fontSize: 16.0,
-                                    color: _selectedIndex != null &&
+                            ),
+                            SizedBox(height: 5),
+                            Container(
+                              height: 80,
+                              child: ListView.builder(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20.0),
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    widget.document.data()['subPrice'].length,
+                                itemBuilder: (context, index) {
+                                  List<String> splitRes = widget.document
+                                      .data()['subPrice'][index]
+                                      .split('#');
+                                  _amount = splitRes[0];
+                                  return FilterChip(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    label: Text(
+                                      '$_amount',
+                                      style: TextStyle(
+                                        fontSize: 16.0,
+                                        color: _selectedIndex != null &&
+                                                _selectedIndex == index
+                                            ? c_background
+                                            : t_primary.withOpacity(0.4),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    backgroundColor: _selectedIndex != null &&
                                             _selectedIndex == index
-                                        ? c_background
-                                        : t_primary.withOpacity(0.4),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                backgroundColor: _selectedIndex != null &&
-                                        _selectedIndex == index
-                                    ? c_accent
-                                    : Colors.white.withOpacity(0),
-                                elevation: 0.0,
-                                pressElevation: 0.0,
-                                onSelected: (bool value) {
-                                  if (_selectedIndex != index) {
-                                    _onSelected(
-                                      index,
-                                      widget.subPrice[index],
-                                    );
-                                  }
+                                        ? c_accent
+                                        : Colors.white.withOpacity(0),
+                                    elevation: 0.0,
+                                    pressElevation: 0.0,
+                                    onSelected: (bool value) {
+                                      if (_selectedIndex != index) {
+                                        _onSelected(
+                                          index,
+                                          widget.document.data()['subPrice']
+                                              [index],
+                                        );
+                                      }
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Expanded(
-                                child: Text(
-                                  widget.title,
-                                  style: TextStyle(
-                                    color: t_primary,
-                                    fontSize: 25.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 25.0),
-                            child: Text(
-                              widget.description,
-                              style: TextStyle(
-                                color: Colors.black54,
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.w400,
                               ),
                             ),
-                          ),
+                            SizedBox(height: 15),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 25.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Text(
+                                      widget.document.data()['title'],
+                                      style: TextStyle(
+                                        color: t_primary,
+                                        fontSize: 25.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 25.0),
+                                child: Text(
+                                  widget.document.data()['description'],
+                                  style: TextStyle(
+                                    color: Colors.black54,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 30),
+                          ],
                         ),
-                        SizedBox(height: 30),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               },

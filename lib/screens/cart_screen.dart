@@ -33,8 +33,8 @@ class _CartScreenState extends State<CartScreen> {
           builder: (context) {
             return SimpleDialog(
               title: Text(title),
-              titlePadding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
-              contentPadding: EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 24.0),
+              titlePadding: const EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 0.0),
+              contentPadding: const EdgeInsets.fromLTRB(24.0, 0.0, 24.0, 24.0),
               children: <Widget>[
                 Divider(),
                 SizedBox(height: 10),
@@ -62,10 +62,10 @@ class _CartScreenState extends State<CartScreen> {
                 (BuildContext context, AsyncSnapshot<List<Cart>> snapshot) {
               if (snapshot.hasData) {
                 return ListView.builder(
-                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  padding: const EdgeInsets.symmetric(vertical: 20.0),
                   reverse: true,
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: snapshot.data.length,
                   itemBuilder: (BuildContext context, int index) {
                     Cart item = snapshot.data[index];
@@ -191,6 +191,7 @@ class _CartScreenState extends State<CartScreen> {
             child: Padding(
               padding: const EdgeInsets.only(top: 120),
               child: CustomScrollView(
+                physics: BouncingScrollPhysics(),
                 slivers: <Widget>[
                   SliverList(
                     delegate: SliverChildListDelegate(
@@ -211,7 +212,7 @@ class _CartScreenState extends State<CartScreen> {
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10.0),
-                                    child: Text(
+                                    child: const Text(
                                       'Ваша корзина пуста',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(

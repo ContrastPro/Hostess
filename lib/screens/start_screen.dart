@@ -18,7 +18,6 @@ class _StartScreenState extends State<StartScreen> {
   String _searchQuery = "";
   String _animationQr = "show";
 
-  /*String _animationSearch = "open";*/
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -31,12 +30,12 @@ class _StartScreenState extends State<StartScreen> {
 
   _showAlertDialog(BuildContext context) {
     Widget okButton = FlatButton(
-      child: Text("OK"),
+      child: const Text("OK"),
       onPressed: () => Navigator.of(context).pop(),
     );
     AlertDialog alert = AlertDialog(
-      title: Text('Упс...'),
-      content: Text('Похоже ваш QR код неверного формата :('),
+      title: const Text('Упс...'),
+      content: const Text('Похоже ваш QR код неверного формата :('),
       actions: [okButton],
     );
     showDialog(
@@ -78,10 +77,8 @@ class _StartScreenState extends State<StartScreen> {
   Widget build(BuildContext context) {
     Widget _buildSearchField() {
       final border = OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(90.0)),
-        borderSide: BorderSide(
-          color: Colors.transparent,
-        ),
+        borderRadius: const BorderRadius.all(Radius.circular(90.0)),
+        borderSide: BorderSide(color: Colors.transparent),
       );
 
       return Theme(
@@ -91,10 +88,10 @@ class _StartScreenState extends State<StartScreen> {
         ),
         child: TextFormField(
           decoration: InputDecoration(
-            suffix: SizedBox(width: 50),
+            suffix: const SizedBox(width: 50),
             focusedBorder: border,
             border: border,
-            prefixIcon: Icon(
+            prefixIcon: const Icon(
               Icons.search,
               color: Colors.white,
             ),
@@ -127,7 +124,7 @@ class _StartScreenState extends State<StartScreen> {
                 duration: const Duration(seconds: 1),
                 curve: Curves.fastOutSlowIn,
                 child: _buildSearchField(),
-                margin: EdgeInsets.symmetric(horizontal: 14),
+                margin: const EdgeInsets.symmetric(horizontal: 14),
               ),
               Align(
                 alignment: Alignment.bottomRight,
@@ -151,8 +148,8 @@ class _StartScreenState extends State<StartScreen> {
                     _isClicked ? Icons.clear : Icons.search,
                     size: 30.0,
                   ),
-                  padding: EdgeInsets.all(15.0),
-                  shape: CircleBorder(),
+                  padding: const EdgeInsets.all(15.0),
+                  shape: const CircleBorder(),
                 ),
               ),
             ],
@@ -178,7 +175,7 @@ class _StartScreenState extends State<StartScreen> {
           SizedBox(height: 50.0),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Text(
+            child: const Text(
               'Просканируйте Qr код',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -219,7 +216,7 @@ class _StartScreenState extends State<StartScreen> {
               alignment: Alignment.topCenter,
               child: Padding(
                 padding: const EdgeInsets.only(top: 50),
-                child: CircularProgressIndicator(),
+                child: const CircularProgressIndicator(),
               ),
             );
           }
@@ -227,6 +224,7 @@ class _StartScreenState extends State<StartScreen> {
           return ListView.builder(
             padding: const EdgeInsets.all(30),
             itemCount: snapshot.data.docs.length,
+            physics: const BouncingScrollPhysics(),
             itemBuilder: (context, index) {
               return Container(
                 color: c_background,
@@ -268,6 +266,7 @@ class _StartScreenState extends State<StartScreen> {
                 return ListView.builder(
                   padding: const EdgeInsets.all(30),
                   itemCount: snapshot.data.docs.length,
+                  physics: const BouncingScrollPhysics(),
                   itemBuilder: (context, index) {
                     return Container(
                       color: c_background,
@@ -312,46 +311,6 @@ class _StartScreenState extends State<StartScreen> {
           _searchQuery.isNotEmpty ? _searchList() : _globalList(),
         ],
       );
-      /*: Column(
-              children: [
-                SizedBox(height: 30),
-                Container(
-                  width: 200,
-                  height: 200,
-                  child: FlareActor(
-                    "assets/rive/search_button.flr",
-                    alignment: Alignment.center,
-                    fit: BoxFit.contain,
-                    animation: _animationSearch,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Text(
-                    'Привет!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: t_primary,
-                      fontSize: 25.0,
-                      letterSpacing: 1.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
-                  child: Text(
-                    'Найдите заведение, которое вам нравиться, прямо сейчас!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: t_primary.withOpacity(0.5),
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                ),
-              ],
-            );*/
     }
 
     return Scaffold(
@@ -400,7 +359,7 @@ class _StartScreenState extends State<StartScreen> {
             curve: Curves.fastOutSlowIn,
             decoration: BoxDecoration(
               color: c_background,
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(30.0),
                 topRight: Radius.circular(30.0),
               ),
@@ -422,8 +381,8 @@ class _StartScreenState extends State<StartScreen> {
         child: FloatingActionButton.extended(
           backgroundColor: c_secondary,
           onPressed: () => _scanQR(),
-          icon: Icon(Icons.camera_enhance),
-          label: Text(
+          icon: const Icon(Icons.camera_enhance),
+          label: const Text(
             'СКАНИРОВАТЬ',
             style: TextStyle(color: Colors.white),
           ),

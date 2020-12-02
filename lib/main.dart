@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
 import 'package:hostess/screens/start_screen.dart';
 import 'package:provider/provider.dart';
-
 import 'notifier/categories_notifier.dart';
 
 void main() => runApp(
@@ -28,6 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'Hostess',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: CheckConnection(),
     );
