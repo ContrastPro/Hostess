@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// FadeRoute() - custom Navigation route for example, like MaterialPageRoute()
+/// but used more smoother transition animation
+
 class FadeRoute extends PageRouteBuilder {
   final Widget page;
 

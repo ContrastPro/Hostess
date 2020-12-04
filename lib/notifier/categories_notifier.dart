@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
-import 'package:hostess/models/categories.dart';
+import 'package:hostess/model/categories.dart';
 
 class CategoriesNotifier with ChangeNotifier {
   List<Categories> _categoriesList = [];

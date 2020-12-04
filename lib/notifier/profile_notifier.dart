@@ -1,7 +1,7 @@
 import 'dart:collection';
 
 import 'package:flutter/cupertino.dart';
-import 'package:hostess/models/profile.dart';
+import 'package:hostess/model/profile.dart';
 
 class ProfileNotifier with ChangeNotifier {
   List<Profile> _profileList = [];

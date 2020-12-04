@@ -1,12 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:hostess/database/db_cart.dart';
 import 'package:hostess/global/colors.dart';
-import 'package:hostess/global/fade_route.dart';
-import 'package:hostess/models/cart.dart';
-import 'package:hostess/screens/cart_screen.dart';
+import 'package:hostess/model/cart.dart';
 
 class FoodDetail extends StatefulWidget {
   final DocumentSnapshot document;
@@ -19,13 +16,11 @@ class FoodDetail extends StatefulWidget {
 
 class _FoodDetailState extends State<FoodDetail> {
   int _selectedIndex = 0;
-  int _total;
   String _price, _amount;
 
   @override
   void initState() {
     _preLoadPrice();
-    _isEmptyCart();
     super.initState();
   }
 
@@ -34,25 +29,18 @@ class _FoodDetailState extends State<FoodDetail> {
     setState(() => _price = splitRes[1]);
   }
 
-  _isEmptyCart() async {
-    int total = await MastersDatabaseProvider.db.calculateTotal();
-    setState(() => _total = total);
-  }
-
   _addToCart(String image, String title, String price, String description,
       String amount) async {
     List<String> splitRes = amount.split('#');
     _amount = splitRes[0];
     _price = splitRes[1];
-    await MastersDatabaseProvider.db.addItemToDatabaseCart(
-      Cart(
-        image: image,
-        title: title,
-        price: int.parse(_price),
-        description: description,
-        amount: _amount,
-      ),
-    );
+    await MastersDatabaseProvider.db.addItemToDatabaseCart(Cart(
+      image: image,
+      title: title,
+      price: int.parse(_price),
+      description: description,
+      amount: _amount,
+    ));
   }
 
   _onSelected(int index, subPrice) {
@@ -130,7 +118,7 @@ class _FoodDetailState extends State<FoodDetail> {
             backgroundColor: Colors.transparent,
             body: DraggableScrollableSheet(
               initialChildSize: 0.55,
-              maxChildSize: 0.70,
+              maxChildSize: 0.80,
               minChildSize: 0.25,
               builder:
                   (BuildContext context, ScrollController scrollController) {
@@ -227,8 +215,8 @@ class _FoodDetailState extends State<FoodDetail> {
                                       FloatingActionButton(
                                         elevation: 0,
                                         highlightElevation: 0,
-                                        onPressed: () async {
-                                          await _addToCart(
+                                        onPressed: () {
+                                           _addToCart(
                                             widget.document.data()['imageLow'],
                                             widget.document.data()['title'],
                                             widget.document.data()['subPrice']
@@ -239,7 +227,6 @@ class _FoodDetailState extends State<FoodDetail> {
                                                 [_selectedIndex],
                                           );
                                           _show(context);
-                                          _isEmptyCart();
                                         },
                                         child: Icon(Icons.add),
                                         backgroundColor: c_primary,
@@ -348,49 +335,15 @@ class _FoodDetailState extends State<FoodDetail> {
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(top: 20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  RawMaterialButton(
+              child: ButtonBar(
+                alignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FlatButton(
                     onPressed: () => Navigator.pop(context),
-                    fillColor: c_secondary.withOpacity(0.5),
+                    color: c_secondary.withOpacity(0.5),
                     child: Icon(
                       Icons.arrow_back,
                       color: Colors.white,
-                    ),
-                    padding: EdgeInsets.all(13.0),
-                    shape: CircleBorder(),
-                  ),
-                  RawMaterialButton(
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        FadeRoute(
-                          page: CartScreen(),
-                        ),
-                      );
-                      _isEmptyCart();
-                    },
-                    fillColor: c_secondary.withOpacity(.5),
-                    child: Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Icon(
-                          Icons.shopping_cart,
-                          color: Colors.white,
-                        ),
-                        _total != null
-                            ? Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  color: c_accent,
-                                  shape: BoxShape.circle,
-                                ),
-                              )
-                            : SizedBox(),
-                      ],
                     ),
                     padding: EdgeInsets.all(13.0),
                     shape: CircleBorder(),

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hostess/models/profile.dart';
+import 'package:hostess/model/profile.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
 
 getProfile(ProfileNotifier profileNotifier, String uid, String address) async {
