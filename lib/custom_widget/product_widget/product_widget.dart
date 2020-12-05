@@ -589,7 +589,7 @@ class _ProductWidgetState extends State<ProductWidget>
             child: AnimatedContainer(
               width: double.infinity,
               height: _isClicked
-                  ? MediaQuery.of(context).size.height * 0.77
+                  ? MediaQuery.of(context).size.height * 0.70
                   : 110.0,
               duration: Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,

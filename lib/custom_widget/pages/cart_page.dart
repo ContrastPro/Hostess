@@ -170,6 +170,7 @@ class CartPage extends StatelessWidget {
                       <Widget>[
                         cartNotifier.totalPrice == null
                             ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Container(
                                     width: 235,
@@ -189,21 +190,21 @@ class CartPage extends StatelessWidget {
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: t_primary,
-                                        fontSize: 25.0,
+                                        fontSize: 20.0,
                                         letterSpacing: 1.0,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 10),
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        20.0, 10.0, 20.0, 0.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20),
                                     child: Text(
                                       'Похоже вы еще ничего не добавили. Давайте это исправим!',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: t_primary.withOpacity(0.5),
-                                        fontSize: 18.0,
+                                        fontSize: 16.0,
                                         fontWeight: FontWeight.normal,
                                       ),
                                     ),

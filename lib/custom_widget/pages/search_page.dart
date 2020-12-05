@@ -63,7 +63,7 @@ class _SearchPageState extends State<SearchPage> {
             return Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: const EdgeInsets.only(top: 150),
+                padding: const EdgeInsets.only(top: 140),
                 child: const CircularProgressIndicator(),
               ),
             );
@@ -148,7 +148,7 @@ class _SearchPageState extends State<SearchPage> {
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: const EdgeInsets.only(top: 150),
+                padding: const EdgeInsets.only(top: 140),
                 child: _searchQuery.isNotEmpty
                     ? SizedBox()
                     : CircularProgressIndicator(),

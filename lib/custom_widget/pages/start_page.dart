@@ -65,8 +65,8 @@ class _StartPageState extends State<StartPage> {
   Widget build(BuildContext context) {
     Widget _setScan() {
       return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.20),
           Container(
             width: 180,
             height: 180,
@@ -85,20 +85,21 @@ class _StartPageState extends State<StartPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: t_primary,
-                fontSize: 22.0,
+                fontSize: 20.0,
                 letterSpacing: 1.0,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
+          SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 0.0),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               'Нажмите кнопку "Сканировать", наведите камеру на QR код и всё готово!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: t_primary.withOpacity(0.5),
-                fontSize: 18.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.normal,
               ),
             ),
