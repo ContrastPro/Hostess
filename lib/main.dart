@@ -2,7 +2,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hostess/home_screen.dart';
+import 'package:hostess/notifier/cart_notifire.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
+import 'package:hostess/notifier/tab_notifire.dart';
 import 'package:provider/provider.dart';
 import 'notifier/categories_notifier.dart';
 
@@ -10,11 +12,17 @@ void main() => runApp(
       MultiProvider(
         providers: [
           ChangeNotifierProvider(
-            create: (_) => ProfileNotifier(),
+            create: (context) => ProfileNotifier(),
           ),
           ChangeNotifierProvider(
-            create: (_) => CategoriesNotifier(),
+            create: (context) => CategoriesNotifier(),
           ),
+          ChangeNotifierProvider(
+            create: (context) => CartNotifier(),
+          ),
+          ChangeNotifierProvider(
+            create: (context) => TabNotifier(),
+          )
         ],
         child: MyApp(),
       ),
@@ -23,6 +31,9 @@ void main() => runApp(
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Hostess',
@@ -38,9 +49,6 @@ class MyApp extends StatelessWidget {
 class CheckConnection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(statusBarColor: Colors.transparent));
     return FutureBuilder(
       future: Firebase.initializeApp(),
       builder: (context, snapshot) {

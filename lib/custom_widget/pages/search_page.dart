@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hostess/custom_widget/custom_container.dart';
 import 'package:hostess/custom_widget/custom_fade_route.dart';
-import 'package:hostess/custom_widget/product_widgets/product_widget.dart';
+import 'package:hostess/custom_widget/product_widget/product_widget.dart';
 import 'package:hostess/global/colors.dart';
 
 class SearchPage extends StatefulWidget {
@@ -18,7 +18,7 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
     Widget _buildSearchField() {
       final border = OutlineInputBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(90.0)),
+        borderRadius: const BorderRadius.all(Radius.circular(15.0)),
         borderSide: BorderSide(color: Colors.transparent),
       );
 
@@ -34,12 +34,13 @@ class _SearchPageState extends State<SearchPage> {
             border: border,
             prefixIcon: const Icon(
               Icons.search,
-              color: c_secondary,
+              color: c_primary,
             ),
             filled: true,
             hintText: 'Название заведения',
             hintStyle: TextStyle(color: Colors.black.withOpacity(0.6)),
-            fillColor: Colors.white.withOpacity(0.8),
+            /*fillColor: Colors.white.withOpacity(0.8),*/
+            fillColor: c_secondary.withOpacity(0.15),
           ),
           controller: _searchController,
           onChanged: (String value) {
@@ -144,9 +145,18 @@ class _SearchPageState extends State<SearchPage> {
         title: 'Поиск',
         child: Stack(
           children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(top: 150),
+                child: _searchQuery.isNotEmpty
+                    ? SizedBox()
+                    : CircularProgressIndicator(),
+              ),
+            ),
             _searchQuery.isNotEmpty ? _searchList() : _globalList(),
             Padding(
-              padding: const EdgeInsets.fromLTRB(12.0, 40.0, 12.0, 0.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 0.0),
               child: _buildSearchField(),
             ),
           ],

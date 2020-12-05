@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:hostess/custom_widget/custom_container.dart';
 import 'package:hostess/custom_widget/custom_fade_route.dart';
-import 'package:hostess/custom_widget/product_widgets/product_widget.dart';
+import 'package:hostess/custom_widget/product_widget/product_widget.dart';
 import 'package:hostess/global/colors.dart';
 
 class StartPage extends StatefulWidget {

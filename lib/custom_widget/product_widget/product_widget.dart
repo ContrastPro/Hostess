@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hostess/api/categories_api.dart';
 import 'package:hostess/api/profile_api.dart';
 import 'package:hostess/custom_widget/custom_fade_route.dart';
-import 'package:hostess/custom_widget/product_widgets/detail_product_widget.dart';
+import 'package:hostess/custom_widget/product_widget/detail_product_widget.dart';
 import 'package:hostess/global/colors.dart';
 import 'package:hostess/notifier/categories_notifier.dart';
 import 'package:hostess/notifier/profile_notifier.dart';
@@ -549,20 +549,6 @@ class _ProductWidgetState extends State<ProductWidget>
                   itemCount: profileNotifier.profileList[0].subLanguages.length,
                   controller: _pageController,
                   physics: NeverScrollableScrollPhysics(),
-                  /*onPageChanged: (int i) {
-                    setState(() {
-                      _addressIndex = i;
-                      _language =
-                          profileNotifier.profileList[0].subLanguages[i];
-                      _selectedIndex = 0;
-                    });
-                    getCategories(
-                      categoriesNotifier,
-                      widget.uid,
-                      widget.address,
-                      profileNotifier.profileList[0].subLanguages[i],
-                    );
-                  },*/
                   itemBuilder: (context, index) {
                     return Transform.scale(
                       scale: index == _addressIndex ? 1 : 0.8,
@@ -682,18 +668,19 @@ class _ProductWidgetState extends State<ProductWidget>
                             Container(
                               height: 80,
                               child: ListView.builder(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 24),
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount:
-                                      categoriesNotifier.categoriesList.length,
-                                  physics: const BouncingScrollPhysics(),
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: EdgeInsets.all(5.0),
-                                      child: _chipItem(index),
-                                    );
-                                  }),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 24),
+                                scrollDirection: Axis.horizontal,
+                                itemCount:
+                                    categoriesNotifier.categoriesList.length,
+                                physics: const BouncingScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: EdgeInsets.all(5.0),
+                                    child: _chipItem(index),
+                                  );
+                                },
+                              ),
                             ),
                             _setMenu(),
                           ],

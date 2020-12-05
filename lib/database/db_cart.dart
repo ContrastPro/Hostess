@@ -46,8 +46,7 @@ class MastersDatabaseProvider {
   Future<List<Cart>> getAllCart() async {
     final db = await database;
     var response = await db.query("Cart");
-    List<Cart> list = response.map((c) => Cart.fromMap(c)).toList();
-    return list;
+    return response.map((c) => Cart.fromMap(c)).toList();
   }
 
   Future calculateTotal() async {

@@ -5,29 +5,14 @@ import 'package:hostess/custom_widget/custom_container.dart';
 import 'package:hostess/database/db_cart.dart';
 import 'package:hostess/global/colors.dart';
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:hostess/model/cart.dart';
+import 'package:hostess/notifier/cart_notifire.dart';
+import 'package:provider/provider.dart';
 
-class CartPage extends StatefulWidget {
-  @override
-  _CartPageState createState() => _CartPageState();
-}
-
-class _CartPageState extends State<CartPage> {
-  int _total;
-
-  @override
-  void initState() {
-    _calculateTotal();
-    super.initState();
-  }
-
-  _calculateTotal() async {
-    int total = await MastersDatabaseProvider.db.calculateTotal();
-    setState(() => _total = total);
-  }
-
+class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final cartNotifier = Provider.of<CartNotifier>(context);
+
     _showDetailDialog(String title, String description, String amount) {
       showDialog(
         context: context,
@@ -58,121 +43,113 @@ class _CartPageState extends State<CartPage> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          FutureBuilder<List<Cart>>(
-            future: MastersDatabaseProvider.db.getAllCart(),
-            builder:
-                (BuildContext context, AsyncSnapshot<List<Cart>> snapshot) {
-              if (snapshot.hasData) {
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 20.0),
-                  reverse: true,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: snapshot.data.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    Cart cart = snapshot.data[index];
-                    return InkWell(
-                      onTap: () {
-                        _showDetailDialog(
-                          cart.title,
-                          cart.description,
-                          cart.amount,
-                        );
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(left: 22),
-                        height: 120,
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                              width: 85,
-                              height: 85,
-                              child: Card(
-                                semanticContainer: true,
-                                clipBehavior: Clip.antiAliasWithSaveLayer,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.0),
-                                ),
-                                child: cart.image != null
-                                    ? CachedNetworkImage(
-                                        fit: BoxFit.cover,
-                                        imageUrl: cart.image,
-                                        errorWidget: (context, url, error) =>
-                                            Image.asset(
-                                                'assets/placeholder_200.png',
-                                                fit: BoxFit.cover),
-                                      )
-                                    : Image.asset('assets/placeholder_200.png',
-                                        fit: BoxFit.cover),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(
-                                    20.0, 5.0, 10.0, 5.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text(
-                                      "${cart.title}",
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: t_primary,
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: <Widget>[
-                                        Text(
-                                          '₴',
-                                          style: TextStyle(
-                                            color: t_primary,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        SizedBox(width: 2),
-                                        Text(
-                                          "${cart.price}",
-                                          style: TextStyle(
-                                              color: t_primary,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            RawMaterialButton(
-                              onPressed: () {
-                                MastersDatabaseProvider.db
-                                    .deleteItemWithId(cart.id);
-                                _calculateTotal();
-                              },
-                              fillColor: Colors.white,
-                              child: Icon(Icons.delete_outline),
-                              padding: EdgeInsets.all(10.0),
-                              shape: CircleBorder(),
-                            )
-                          ],
+          ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            reverse: true,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: cartNotifier.cartList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return InkWell(
+                onTap: () {
+                  _showDetailDialog(
+                    cartNotifier.cartList[index].title,
+                    cartNotifier.cartList[index].description,
+                    cartNotifier.cartList[index].amount,
+                  );
+                  print(cartNotifier.cartList[index].id);
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 22),
+                  height: 120,
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 85,
+                        height: 85,
+                        child: Card(
+                          semanticContainer: true,
+                          clipBehavior: Clip.antiAliasWithSaveLayer,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          child: cartNotifier.cartList[index].image != null
+                              ? CachedNetworkImage(
+                                  fit: BoxFit.cover,
+                                  imageUrl: cartNotifier.cartList[index].image,
+                                  errorWidget: (context, url, error) =>
+                                      Image.asset('assets/placeholder_200.png',
+                                          fit: BoxFit.cover),
+                                )
+                              : Image.asset('assets/placeholder_200.png',
+                                  fit: BoxFit.cover),
                         ),
                       ),
-                    );
-                  },
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
+                      Expanded(
+                        child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(20.0, 5.0, 10.0, 5.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text(
+                                "${cartNotifier.cartList[index].title}",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: t_primary,
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Text(
+                                    '₴',
+                                    style: TextStyle(
+                                      color: t_primary,
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  SizedBox(width: 2),
+                                  Text(
+                                    "${cartNotifier.cartList[index].price}",
+                                    style: TextStyle(
+                                        color: t_primary,
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      ButtonBar(
+                        children: [
+                          FlatButton(
+                            onPressed: () {
+                              MastersDatabaseProvider.db.deleteItemWithId(
+                                  cartNotifier.cartList[index].id);
+                              cartNotifier.deleteCartItem(
+                                  cartNotifier.cartList[index].id);
+                            },
+                            child: Icon(Icons.remove_circle_outline),
+                            padding: EdgeInsets.all(10.0),
+                            shape: CircleBorder(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
-          ),
+          )
         ],
       );
     }
@@ -191,7 +168,7 @@ class _CartPageState extends State<CartPage> {
                   SliverList(
                     delegate: SliverChildListDelegate(
                       <Widget>[
-                        _total == null
+                        cartNotifier.totalPrice == null
                             ? Column(
                                 children: [
                                   Container(
@@ -208,7 +185,7 @@ class _CartPageState extends State<CartPage> {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10.0),
                                     child: const Text(
-                                      'Ваша корзина пуста',
+                                      'Ваш заказ пуст',
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: t_primary,
@@ -240,73 +217,76 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             ),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.only(left: 25.0),
-              height: 130,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
+            cartNotifier.cartList.length > 0
+                ? Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(left: 25.0),
+                    height: 130,
                     child: Row(
-                      children: [
-                        Text(
-                          "Итого:",
-                          style: TextStyle(
-                            color: t_primary,
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        SizedBox(width: 20.0),
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
                         Expanded(
                           child: Row(
                             children: [
                               Text(
-                                '₴',
+                                "Итого:",
                                 style: TextStyle(
-                                    color: t_primary,
-                                    fontSize: 25.0,
-                                    fontWeight: FontWeight.w500),
+                                  color: t_primary,
+                                  fontSize: 25.0,
+                                  fontWeight: FontWeight.w900,
+                                ),
                               ),
-                              SizedBox(width: 3),
+                              SizedBox(width: 20.0),
                               Expanded(
-                                child: AutoSizeText(
-                                  _total != null ? '$_total' : '0',
-                                  maxLines: 1,
-                                  minFontSize: 20,
-                                  style: TextStyle(
-                                    color: t_primary,
-                                    fontSize: 25.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      '₴',
+                                      style: TextStyle(
+                                          color: t_primary,
+                                          fontSize: 25.0,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    SizedBox(width: 3),
+                                    Expanded(
+                                      child: AutoSizeText(
+                                        cartNotifier.totalPrice != null
+                                            ? '${cartNotifier.totalPrice}'
+                                            : '0',
+                                        maxLines: 1,
+                                        minFontSize: 20,
+                                        style: TextStyle(
+                                          color: t_primary,
+                                          fontSize: 25.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
+                        ButtonBar(
+                          children: [
+                            FlatButton(
+                              onPressed: () {
+                                MastersDatabaseProvider.db.deleteAllCart();
+                                cartNotifier.getAllCart();
+                              },
+                              color: c_accent,
+                              child: Icon(Icons.delete_forever),
+                              padding: EdgeInsets.all(10.0),
+                              shape: CircleBorder(),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                  _total != null
-                      ? RawMaterialButton(
-                          onPressed: () {
-                            MastersDatabaseProvider.db.deleteAllCart();
-                            _calculateTotal();
-                          },
-                          fillColor: c_accent,
-                          child: Icon(
-                            Icons.delete_forever,
-                            color: c_background,
-                          ),
-                          padding: EdgeInsets.all(12.0),
-                          shape: CircleBorder(),
-                        )
-                      : Container()
-                ],
-              ),
-            ),
+                  )
+                : SizedBox(),
           ],
         ),
       ),
