@@ -198,7 +198,8 @@ class CartPage extends StatelessWidget {
                                   ),
                                   SizedBox(height: 10),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20),
                                     child: Text(
                                       'Похоже вы еще ничего не добавили. Давайте это исправим!',
                                       textAlign: TextAlign.center,

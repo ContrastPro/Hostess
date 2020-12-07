@@ -36,7 +36,7 @@ class _ProductWidgetState extends State<ProductWidget>
 
   @override
   void initState() {
-    _preLoad();
+    _preloadContent();
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 1));
     _pageController = PageController(
@@ -52,32 +52,32 @@ class _ProductWidgetState extends State<ProductWidget>
     super.dispose();
   }
 
-  Future<void> _preLoad() async {
+  Future<void> _preloadContent() async {
     await FirebaseFirestore.instance
+        .collection('Database')
+
+        /// Users or Public_Catering
+        .doc('Public_Catering')
         .collection(widget.uid)
         .doc(widget.address)
         .get()
         .then((DocumentSnapshot document) {
       if (document.exists && document.data()['isAvailable'] == true) {
-        setState(() {
-          _isExist = 0;
-        });
-        _load();
+        setState(() => _isExist = 0);
+        _loadingContent();
       } else {
-        setState(() {
-          _isExist = 2;
-        });
+        setState(() => _isExist = 2);
       }
     });
   }
 
-  _load() async {
-    ProfileNotifier profileNotifier =
+  _loadingContent() async {
+    final profileNotifier =
         Provider.of<ProfileNotifier>(context, listen: false);
     await getProfile(profileNotifier, widget.uid, widget.address);
     setState(() => _language = profileNotifier.profileList[0].subLanguages[0]);
 
-    CategoriesNotifier categoriesNotifier =
+    final categoriesNotifier =
         Provider.of<CategoriesNotifier>(context, listen: false);
     getCategories(categoriesNotifier, widget.uid, widget.address,
         profileNotifier.profileList[0].subLanguages[0]);
@@ -85,10 +85,9 @@ class _ProductWidgetState extends State<ProductWidget>
 
   @override
   Widget build(BuildContext context) {
-    ProfileNotifier profileNotifier = Provider.of<ProfileNotifier>(context);
+    final profileNotifier = Provider.of<ProfileNotifier>(context);
 
-    CategoriesNotifier categoriesNotifier =
-        Provider.of<CategoriesNotifier>(context);
+    final categoriesNotifier = Provider.of<CategoriesNotifier>(context);
 
     _launchMap(String openMap) async {
       String url =
@@ -355,6 +354,10 @@ class _ProductWidgetState extends State<ProductWidget>
                 ),
                 StreamBuilder(
                   stream: FirebaseFirestore.instance
+                      .collection('Database')
+
+                      /// Users or Public_Catering
+                      .doc('Public_Catering')
                       .collection(widget.uid)
                       .doc(widget.address)
                       .collection(_language)
@@ -589,7 +592,7 @@ class _ProductWidgetState extends State<ProductWidget>
             child: AnimatedContainer(
               width: double.infinity,
               height: _isClicked
-                  ? MediaQuery.of(context).size.height * 0.70
+                  ? MediaQuery.of(context).size.height - 180.0
                   : 110.0,
               duration: Duration(seconds: 1),
               curve: Curves.fastOutSlowIn,
@@ -742,6 +745,8 @@ class _ProductWidgetState extends State<ProductWidget>
       } else {
         return Scaffold(
           backgroundColor: Colors.white,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
           floatingActionButton: FloatingActionButton.extended(
             backgroundColor: c_secondary,
             onPressed: () => Navigator.pop(context),

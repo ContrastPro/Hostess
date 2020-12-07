@@ -12,6 +12,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   String _searchQuery = "";
+  String _searchCategory = "All";
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -53,7 +54,9 @@ class _SearchPageState extends State<SearchPage> {
     Widget _searchList() {
       return StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('Global_Search')
+            .collection('Search')
+            .doc('Global_Search')
+            .collection(_searchCategory)
             .where('subSearchKey', arrayContains: _searchQuery)
             .snapshots(),
         builder: (context, snapshot) {
@@ -100,8 +103,11 @@ class _SearchPageState extends State<SearchPage> {
 
     Widget _globalList() {
       return StreamBuilder<QuerySnapshot>(
-        stream:
-            FirebaseFirestore.instance.collection('Global_Search').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('Search')
+            .doc('Global_Search')
+            .collection(_searchCategory)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
 

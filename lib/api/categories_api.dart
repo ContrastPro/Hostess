@@ -5,6 +5,10 @@ import 'package:hostess/notifier/categories_notifier.dart';
 getCategories(CategoriesNotifier categoriesNotifier, String uid, String address,
     String language) async {
   QuerySnapshot snapshot = await FirebaseFirestore.instance
+      .collection('Database')
+
+      /// Users or Public_Catering
+      .doc('Public_Catering')
       .collection(uid)
       .doc(address)
       .collection(language)

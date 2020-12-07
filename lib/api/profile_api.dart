@@ -4,6 +4,10 @@ import 'package:hostess/notifier/profile_notifier.dart';
 
 getProfile(ProfileNotifier profileNotifier, String uid, String address) async {
   QuerySnapshot snapshot = await FirebaseFirestore.instance
+      .collection('Database')
+
+      /// Users or Public_Catering
+      .doc('Public_Catering')
       .collection(uid)
       .where('id', isEqualTo: address)
       .get();
