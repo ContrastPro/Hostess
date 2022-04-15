@@ -151,15 +151,14 @@ class _SearchPageState extends State<SearchPage> {
         title: 'Поиск',
         child: Stack(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(top: 140),
-                child: _searchQuery.isNotEmpty
-                    ? SizedBox()
-                    : CircularProgressIndicator(),
+            if (_searchQuery.isNotEmpty)
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 140),
+                  child: CircularProgressIndicator(),
+                ),
               ),
-            ),
             _searchQuery.isNotEmpty ? _searchList() : _globalList(),
             Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 0.0),

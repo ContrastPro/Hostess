@@ -219,76 +219,75 @@ class CartPage extends StatelessWidget {
                 ],
               ),
             ),
-            cartNotifier.cartList.length > 0
-                ? Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.only(left: 25.0),
-                    height: 130,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Row(
-                            children: [
-                              Text(
-                                "Итого:",
-                                style: TextStyle(
-                                  color: t_primary,
-                                  fontSize: 25.0,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                              SizedBox(width: 20.0),
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      '₴',
-                                      style: TextStyle(
-                                          color: t_primary,
-                                          fontSize: 25.0,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    SizedBox(width: 3),
-                                    Expanded(
-                                      child: AutoSizeText(
-                                        cartNotifier.totalPrice != null
-                                            ? '${cartNotifier.totalPrice}'
-                                            : '0',
-                                        maxLines: 1,
-                                        minFontSize: 20,
-                                        style: TextStyle(
-                                          color: t_primary,
-                                          fontSize: 25.0,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        ButtonBar(
-                          children: [
-                            FlatButton(
-                              onPressed: () {
-                                MastersDatabaseProvider.db.deleteAllCart();
-                                cartNotifier.getAllCart();
-                              },
-                              color: c_accent,
-                              child: Icon(Icons.delete_forever),
-                              padding: EdgeInsets.all(10.0),
-                              shape: CircleBorder(),
+            if (cartNotifier.cartList.length > 0)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.only(left: 25.0),
+                height: 130,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(
+                            "Итого:",
+                            style: TextStyle(
+                              color: t_primary,
+                              fontSize: 25.0,
+                              fontWeight: FontWeight.w900,
                             ),
-                          ],
+                          ),
+                          SizedBox(width: 20.0),
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  '₴',
+                                  style: TextStyle(
+                                      color: t_primary,
+                                      fontSize: 25.0,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                SizedBox(width: 3),
+                                Expanded(
+                                  child: AutoSizeText(
+                                    cartNotifier.totalPrice != null
+                                        ? '${cartNotifier.totalPrice}'
+                                        : '0',
+                                    maxLines: 1,
+                                    minFontSize: 20,
+                                    style: TextStyle(
+                                      color: t_primary,
+                                      fontSize: 25.0,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ButtonBar(
+                      children: [
+                        FlatButton(
+                          onPressed: () {
+                            MastersDatabaseProvider.db.deleteAllCart();
+                            cartNotifier.getAllCart();
+                          },
+                          color: c_accent,
+                          child: Icon(Icons.delete_forever),
+                          padding: EdgeInsets.all(10.0),
+                          shape: CircleBorder(),
                         ),
                       ],
                     ),
-                  )
-                : SizedBox(),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

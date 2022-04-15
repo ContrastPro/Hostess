@@ -1,14 +1,16 @@
+import 'package:flutter/material.dart';
+
 class Cart {
   int id, price;
   String image, title, description, amount;
 
   Cart({
-    this.id,
-    this.image,
-    this.price,
-    this.title,
-    this.description,
-    this.amount,
+    @required this.id,
+    @required this.image,
+    @required this.price,
+    @required this.title,
+    @required this.description,
+    @required this.amount,
   });
 
   Cart.fromMap(Map<String, dynamic> map)

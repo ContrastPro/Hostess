@@ -17,7 +17,8 @@ class ProductWidget extends StatefulWidget {
   final String uid;
   final String address;
 
-  const ProductWidget({Key key, this.uid, this.address}) : super(key: key);
+  const ProductWidget({Key key, @required this.uid, @required this.address})
+      : super(key: key);
 
   @override
   _ProductWidgetState createState() => _ProductWidgetState();
@@ -500,37 +501,36 @@ class _ProductWidgetState extends State<ProductWidget>
                       ],
                     ),
                   ),
-                  profileNotifier.profileList[0].phone.isNotEmpty
-                      ? Column(
-                          children: [
-                            SizedBox(height: 20),
-                            GestureDetector(
-                              onTap: () => _makePhoneCall(
-                                  'tel:${profileNotifier.profileList[0].phone}'),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    Icons.phone,
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      profileNotifier.profileList[0].phone,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                        fontWeight: FontWeight.w300,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                  if (profileNotifier.profileList[0].phone.isNotEmpty)
+                    Column(
+                      children: [
+                        SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => _makePhoneCall(
+                              'tel:${profileNotifier.profileList[0].phone}'),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(
+                                Icons.phone,
+                                color: Colors.white,
                               ),
-                            ),
-                          ],
-                        )
-                      : SizedBox(),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  profileNotifier.profileList[0].phone,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w300,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   SizedBox(height: 20),
                   _time(),
                 ],

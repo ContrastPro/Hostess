@@ -7,6 +7,7 @@ import 'package:hostess/custom_widget/custom_fade_route.dart';
 import 'package:hostess/custom_widget/product_widget/product_widget.dart';
 import 'package:hostess/global/colors.dart';
 
+
 class StartPage extends StatefulWidget {
   @override
   _StartPageState createState() => _StartPageState();
